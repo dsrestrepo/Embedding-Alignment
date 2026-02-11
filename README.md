@@ -1,8 +1,8 @@
-# Multimodal Data Fusion Using Embeddings.
+# Multimodal Data Fusion and Embedding Alignment in VLMs
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-This repository contains a framework for Multimodal Data Fusion using Foundational Models' Embeddings, and and Embedding Alignment method. The framework allows you to extract, pre-process and align embedding data from different sources and modalities using the most powerful vision and language models making a more efficient use of resources and data.
+This repository contains a framework for Multimodal Data Fusion using Vision-Language Models (VLMs) and an Embedding Alignment method. The framework allows you to extract, pre-process, and align embedding data from different sources and modalities using powerful VLMs (like CLIP), making efficient use of resources and data by improving zero-shot or few-shot performance through alignment.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ This repository contains a framework for Multimodal Data Fusion using Foundation
 
 ## Introduction
 
-This framework leverages state-of-the-art foundational models to combine multimodal data for enhanced predictions. The framework is flexible and can be adapted to other multimodal data fusion tasks.
+This framework leverages state-of-the-art Vision-Language Models (VLMs) to combine multimodal data for enhanced predictions. A key focus is **Embedding Alignment**—a method to align embeddings in the same space to reduce the modality gap, thereby improving data fusion tasks without the need for extensive full-model fine-tuning.
 
 ## Setup
 
@@ -24,7 +24,7 @@ This framework leverages state-of-the-art foundational models to combine multimo
 
 Before running the code, ensure you have the following installed:
 
-- Python 3.8.15
+- Python 3.12.7
 - Required Python packages (specified in `requirements.txt`)
 
 ### Installation
@@ -80,7 +80,7 @@ This project uses 8 datasets. You'll find instructions and code about to extract
 
 6. [HAM10000 dataset](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T) : The MNIST: HAM10000 dataset is a large collection of dermatoscopic images from different populations, acquired and stored by the Department of Dermatology at the Medical University of Vienna, Austria. It consists of 10,015 dermatoscopic images which can serve as a training set for academic machine learning purposes in tasks like skin lesion analysis and classification, specifically focusing on the detection of melanoma.
 
-7. [A Multi-Modal Satellite Imagery Dataset for Public Health Analysis in Colombia](https://physionet.org/content/multimodal-satellite-data/1.0.0/) : The Multi-Modal Satellite Imagery Dataset in Colombia integrates economic, demographic, meteorological, and epidemiological data. It comprises 12,636 high-quality satellite images from 81 municipalities between 2016 and 2018, with minimal cloud cover. Its applications include deforestation monitoring, education indices forecasting, water quality assessment, extreme climatic event tracking, epidemic illness addressing, and precision agriculture optimization. We'll use it shortly.
+7. [mBRSET Dataset](https://www.nature.com/articles/s41597-025-04627-3) : mBRSET is an mobile version of the BRSET dataset, offering mobile camera photos, improved labels and structure for multilabel ophthalmological classification tasks.
 
 8. [MIMIC CXR](https://physionet.org/content/mimic-cxr/2.0.0/#files-panel) : The MIMIC-CXR (Medical Information Mart for Intensive Care, Chest X-Ray) dataset is a large, publicly available collection of chest radiographs with associated radiology reports. It was developed by the MIT Lab for Computational Physiology and provides an extensive resource for training and evaluating machine learning models in the field of medical imaging, particularly in automated radiograph interpretation and natural language processing for clinical narratives.
 
@@ -88,45 +88,40 @@ This project uses 8 datasets. You'll find instructions and code about to extract
 
 ## Usage
 
-1. **Get the Dataset:**
-    - Utilize the `get_datasets.ipynb` notebook to acquire the dataset. Functions and code for extraction and preprocessing are provided.
+1. **Get the Datasets:**
+    - Utilize the `Notebooks/get_datasets.ipynb` notebook to acquire the datasets. Functions and code for extraction and preprocessing are provided.
 
-2. **Extract the Embeddings:**
-    - **Text Embeddings:**
-        - For extracting text embeddings, use models supporting OpenAI API like GPT-3.5, GPT-4, or models compatible with the llama cpp package such as LLAMA 2 7B, LLAMA 2 13B, LLAMA 2 70B, or Mistral 7B. Refer to `generate_text_embeddings.ipynb` for the process, in this case we used LLAMA 2 70B.
-        
-        - To use gpu's run `CUDACXX=/usr/local/cuda-11.8/bin/nvcc CMAKE_ARGS="-DLLAMA_CUBLAS=on
--DCMAKE_CUDA_ARCHITECTURES=all-major" FORCE_CMAKE=1 pip install llama-cpp-python==0.2.11 --no-cache-dir --force-reinstall`, see more [here](https://stackoverflow.com/questions/76963311/llama-cpp-python-not-using-nvidia-gpu-cuda)
+2. **Extract VLM Embeddings:**
+    - Use `Notebooks/generate_vlm_embeddings_parallel.ipynb` or the shell script `jobs/job_vlm_embeddings.sh` to extract embeddings from your datasets using state-of-the-art VLMs.
+    - **Supported Models:**
+        - **CLIP** (Contrastive Language-Image Pre-Training)
+        - **SigLIP** (Sigmoid Loss for Language Image Pre-Training)
+        - **MedSigLIP** (Medical-adapted SigLIP)
+        - **BioMedCLIP** (Biomedical Vision-Language Foundation Model)
+    - This step typically generates CSV files containing text and image embeddings which serve as inputs for the alignment process.
+
+3. **Run Alignment Experiments:**
+    - The core alignment and training pipeline is managed via `jobs/run_alignment.sh`.
+    - This script calls `scripts/run_alignment.py` to:
+        - Load the pre-computed embeddings.
+        - Apply embedding alignment techniques (shifting distributions).
+        - Train Early and Late Fusion classifiers on the aligned embeddings.
+        - Evaluate performance and save metrics.
     
-    - **Image Embeddings:**
-        - Choose from 21 available pre-trained computer vision models to extract image embeddings. Check out `generate_image_embeddings.ipynb` for the process, in this example we used Dino V2 Base.
+    You can configure the datasets, paths, and training parameters (like multilabel flags) directly in `jobs/run_alignment.sh`.
 
-3. **Run the Experiments:**
-    - For each dataset, two notebooks are available:
-        - **Embeddings Model:**
-            - Use `embed_model_dataset_name.ipynb` to test embeddings. The model supports early and late fusion approaches.
-                - *Early Fusion Approach:* Concatenate text and image embeddings, pass through a layer with 256 neurons, 0.2 dropout, ReLu Activation, and Batch Normalization. Connect to a classification layer.
-                - *Late Fusion Approach:* Process text and image embeddings with two layers each (128 neurons, ReLu activation, 0.2 dropout, and BatchNorm). Concatenate outputs and connect to a classification layer.
-            - **Training Details:**
-                - Batch size: 64
-                - Workers: 2
-                - Optimizer: AdamW with a learning rate of 0.001
-                - Loss Function: Binary Cross-Entropy for multilabel and binary classification; Cross-Entropy for multiclass classification.
-                - Metrics: Accuracy, F1-score, training time, and inference time measured for each model.
-                - Additional option of class weights is available.
+    ```bash
+    sbatch jobs/run_alignment.sh
+    ```
 
-        - **Baseline Model:**
-            - In `full_model_dataset_name.ipynb`, a baseline model utilizes a BERT transformer for text data and a ViT-based architecture for image data. Information from both backbones is passed to two classification heads with the same configurations as the embedding models.
-            - **Training Details:**
-                - Batch size: 64
-                - Workers: 2
-                - Optimizer: AdamW with a learning rate of 0.001
-                - Loss Function: Binary Cross-Entropy for multilabel and binary classification; Cross-Entropy for multiclass classification.
-                - Metrics: Accuracy, training time, and inference time measured for each model.
-                - Additional option of class weights is available.
+    **Key Scripts:**
+    - `scripts/run_alignment.py`: Main python entry point for alignment and training. Supports argument parsing for multiple datasets and dynamic configuration (e.g., `--multilabel`).
+    - `src/classifiers.py`: Contains the `EarlyFusionModel` and `LateFusionModel` definitions, along with the optimized training loops (including early stopping).
+    - `src/alignment.py`: (Deprecated/Merged) Logic primarily resides in `run_alignment.py`.
 
-        - **Embedding Alignment:**
-            - See the `Alignment/` for examples on how to align the embeddings. The notebooks provides a method to align the embeddings. The method aligns the embeddings in the same space, and reduces the modality gap improving the data fusion without requiring full model training or additional fine-tuning.
+4. **Analysis:**
+   - Results (metrics and plots) are saved to the `Images/Alignment` directory (or your configured output path).
+
 
 ## Contributing
 Contributions to this research project are welcome. To contribute:

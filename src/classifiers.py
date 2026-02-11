@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset
+import copy
 
 
 # Metrics
@@ -35,238 +36,7 @@ import warnings
 # Suppress all warnings
 warnings.filterwarnings("ignore")
 
-######### Merge Datasets #########
-# Define a function to check if a value is a list
-def is_list(value):
-    return isinstance(value, str)
-
-
-def process_embeddings(df, col_name):
-    """
-    Process embeddings in a DataFrame column.
-
-    Args:
-    - df (pd.DataFrame): The DataFrame containing the embeddings column.
-    - col_name (str): The name of the column containing the embeddings.
-
-    Returns:
-    pd.DataFrame: The DataFrame with processed embeddings.
-
-    Steps:
-    1. Convert the values in the specified column to lists.
-    2. Extract values from lists and create new columns for each element.
-    3. Remove the original embeddings column.
-
-    Example:
-    df_processed = process_embeddings(df, 'embeddings')
-    """
-    print("S: check str")
-    # Apply the function to each element in the 'embeddings' column
-    mask = df['embeddings'].apply(is_list)
-
-    # Filter out the rows where the elements are not lists
-    df = df[mask]
-    # Step 1: Convert the values in the column to lists
-    df[col_name] = df[col_name].apply(eval)
-
-    # Step 2-4: Extract values from lists and create new columns
-    embeddings_df = pd.DataFrame(df[col_name].to_list(), columns=[f"text_{i+1}" for i in range(df[col_name].str.len().max())])
-    df = pd.concat([df, embeddings_df], axis=1)
-
-    # Step 5: Remove the original "embeddings" column
-    df = df.drop(columns=[col_name])
-
-    return df
-
-def rename_image_embeddings(df):
-    """
-    Rename columns in a DataFrame for image embeddings.
-
-    Args:
-    - df (pd.DataFrame): The DataFrame containing columns to be renamed.
-
-    Returns:
-    pd.DataFrame: The DataFrame with renamed columns.
-
-    Example:
-    df_renamed = rename_image_embeddings(df)
-    """
-    df.columns = [f'image_{int(col)}' if col.isdigit() else col for col in df.columns]
-
-    return df
-
-# Preprocess and merge the dataframes
-def preprocess_data(text_data, image_data, text_id="image_id", image_id="ImageName", embeddings_col = 'embeddings'):
-    """
-    Preprocess and merge text and image dataframes.
-
-    Args:
-    - text_data (pd.DataFrame): DataFrame containing text data.
-    - image_data (pd.DataFrame): DataFrame containing image data.
-    - text_id (str): Column name for text data identifier.
-    - image_id (str): Column name for image data identifier.
-    - embeddings_col (str): Column name for embeddings data.
-
-    Returns:
-    pd.DataFrame: Merged and preprocessed DataFrame.
-
-    Steps:
-    1. Process text and image embeddings.
-    2. Convert image_id and text_id values to integers.
-    3. Merge dataframes using image_id.
-    4. Drop unnecessary columns.
-
-    Example:
-    merged_df = preprocess_data(text_df, image_df)
-    """
-    text_data = process_embeddings(text_data, embeddings_col)
-    image_data = rename_image_embeddings(image_data)
-    
-    # # Remove file extension from image_id
-    # if text_data[text_id].dtype != int:
-    #     text_data[text_id] = text_data[text_id].apply(lambda x: int(x.split('.')[0]) if x.split('.')[0].isdigit() else x.split('.')[0])
-    # if image_data[image_id].dtype != int:
-    #     image_data[image_id] = image_data[image_id].apply(lambda x: int(x.split('.')[0]) if x.split('.')[0].isdigit() else x.split('.')[0])
-    text_data[text_id] = text_data[text_id].apply(lambda x: str(x).split('.')[0] if isinstance(x, str) else x)
-
-    # text_data[text_id] = text_data[text_id].apply(lambda x: x.split('.')[0])
-    image_data[image_id] = image_data[image_id].apply(lambda x: x.split('.')[0])
-
-    # Merge dataframes using image_id
-    df = pd.merge(text_data, image_data, left_on=text_id, right_on=image_id)
-    
-    # df = pd.concat([text_data, image_data], axis=0)
-
-    # Drop unnecessary columns
-    df.drop([image_id, text_id], axis=1, inplace=True)
-
-    return df
-
-######### Datasets Preparation #########
-
-# Function to split the data into train and test
-def split_data(df):
-    """
-    Split a DataFrame into train and test sets based on the 'split' column.
-
-    Args:
-    - df (pd.DataFrame): The DataFrame to be split.
-
-    Returns:
-    pd.DataFrame: Train set.
-    pd.DataFrame: Test set.
-
-    Example:
-    train_set, test_set = split_data(df)
-    """
-    train_df = df[df['split'] == 'train']
-    test_df = df[df['split'] == 'test']
-    
-    print("Train Shape:", train_df.shape)
-    print("Test Shape:", test_df.shape)
-    return train_df, test_df
-
-# Function to process text labels and one-hot encode them
-def process_labels(df, col='answer', mlb=None, train_columns=None):
-    """
-    Process text labels and perform one-hot encoding using MultiLabelBinarizer.
-
-    Args:
-    - df (pd.DataFrame): The DataFrame containing the labels.
-    - col (str): The column name containing the labels.
-    - mlb (sklearn.preprocessing.MultiLabelBinarizer): The MultiLabelBinarizer object.
-    - train_columns (list): List of columns from the training set.
-
-    Returns:
-    pd.DataFrame: One-hot encoded labels.
-    sklearn.preprocessing.MultiLabelBinarizer: MultiLabelBinarizer object.
-    list: List of columns from the training set.
-
-    Example:
-    one_hot_labels, mlb, train_columns = process_labels(df, col='answer')
-    """
-    df.DR_3 = df.DR_3.astype(str)
-    
-    if mlb is None:
-        mlb = MultiLabelBinarizer()
-
-        if df[col].dtype == int:
-            label = df[col]
-        else:
-            labels = df[col].apply(lambda x: set(x.split(', ')))
-        
-        if df[col].dtype == int and (len(df[col].unique()) == 2):
-            train_columns = col
-            one_hot_labels = label
-        else:
-            one_hot_labels = pd.DataFrame(mlb.fit_transform(labels), columns=mlb.classes_)
-            # Save the columns from the training set
-            train_columns = one_hot_labels.columns
-        
-        return one_hot_labels, mlb, train_columns
-
-    else:
-        if df[col].dtype == int:
-            label = df[col]
-        else:
-            labels = df[col].apply(lambda x: set(x.split(', ')))
-        
-        if df[col].dtype == int and (len(df[col].unique()) == 2):
-            one_hot_labels = label
-        else:
-            one_hot_labels = pd.DataFrame(mlb.transform(labels), columns=train_columns)
-        
-        return one_hot_labels
-
-    
-# Custom Dataset class for PyTorch
-class VQADataset(Dataset):
-    """
-    Custom PyTorch Dataset for VQA (Visual Question Answering).
-
-    Args:
-    - df (pd.DataFrame): The DataFrame containing the dataset.
-    - text_cols (list): List of column names containing text data.
-    - image_cols (list): List of column names containing image data.
-    - label_col (str): Column name containing labels.
-    - mlb (sklearn.preprocessing.MultiLabelBinarizer): MultiLabelBinarizer object.
-    - train_columns (list): List of columns from the training set.
-
-    Attributes:
-    - text_data (np.ndarray): Array of text data.
-    - image_data (np.ndarray): Array of image data.
-    - mlb (sklearn.preprocessing.MultiLabelBinarizer): MultiLabelBinarizer object.
-    - train_columns (list): List of columns from the training set.
-    - labels (np.ndarray): Array of one-hot encoded labels.
-
-    Methods:
-    - __len__(): Returns the length of the dataset.
-    - __getitem__(idx): Returns a dictionary with 'text', 'image', and 'labels'.
-
-    Example:
-    dataset = VQADataset(df, text_cols=['text1', 'text2'], image_cols=['image1', 'image2'], label_col='answer', mlb=mlb, train_columns=train_columns)
-    """
-    def __init__(self, df, text_cols, image_cols, label_col, mlb, train_columns):
-        self.text_data = df[text_cols].values
-        self.image_data = df[image_cols].values
-        self.mlb = mlb
-        self.train_columns = train_columns
-        self.labels = process_labels(df, col=label_col, mlb=mlb, train_columns=train_columns).values
-        #print(self.labels.shape)
-        if len(self.labels.shape) == 1:
-            self.labels = np.expand_dims(self.labels, axis=1)
-
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        return {
-            'text': torch.FloatTensor(self.text_data[idx]),
-            'image': torch.FloatTensor(self.image_data[idx]),
-            'labels': torch.FloatTensor(self.labels[idx])
-        }
-
+from src.data_utils import split_data, process_labels
 
 ######### Models and Evaluation #########
 
@@ -319,7 +89,6 @@ class EarlyFusionModel(nn.Module):
         
         self.fc1 = nn.Sequential(*layers)
 
-        
         #self.fc1 = nn.Linear(text_input_size + image_input_size, hidden)
         
         self.fc2 = nn.Linear(output_dim, output_size)
@@ -506,7 +275,7 @@ def test_model(y_test, y_pred, V=True):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, adam=False, p=0.0, V=True):
+def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, adam=False, p=0.0, V=True, val_loader=None, patience=5):
     """
     Train an Early Fusion Model.
 
@@ -553,6 +322,9 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     else:
         class_weights = None
         
+    if class_weights is not None:
+        class_weights = class_weights.to(device)
+
     if multilabel:
         criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     elif(output_size == 1):
@@ -565,30 +337,13 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     else:
         optimizer = optim.AdamW(model.parameters(), lr=lr)
 
-    #if multilabel or (output_size == 1):
-    #    criterion = nn.BCEWithLogitsLoss()
-    #else:
-    #    criterion = nn.CrossEntropyLoss()
-    
-    best = {
-        'Acc': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []},
-        'Macro-F1': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []},
-        'AUC': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []}  # Add this if prioritizing AUC
-    }
-
-
-    train_accuracy_list = []
-    test_accuracy_list = []
-    f1_accuracy_list = []
-    # Initialize variables to store total training and inference times
-    total_training_time = 0
-    total_inference_time = 0
-    
+    # Early stopping variables
+    best_val_loss = float('inf')
+    epochs_no_improve = 0
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_epoch = 0
 
     for epoch in range(num_epochs):
-        
-        # Start measuring training time
-        epoch_start_time = time.time()
         
         model.train()
 
@@ -600,143 +355,107 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
             loss.backward()
             optimizer.step()
         
-        # End measuring training time
-        epoch_end_time = time.time()
-        epoch_training_time = epoch_end_time - epoch_start_time
-        total_training_time += epoch_training_time
+        # Validation for early stopping
+        if val_loader:
+             model.eval()
+             val_loss = 0.0
+             with torch.no_grad():
+                 for batch in val_loader:
+                     text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+                     outputs = model(text, image)
+                     loss = criterion(outputs, labels)
+                     val_loss += loss.item() * text.size(0)
+             
+             val_loss = val_loss / len(val_loader.dataset)
+             print(f"Epoch {epoch + 1}/{num_epochs} - Validation Loss: {val_loss:.4f}")
+             
+             if val_loss < best_val_loss:
+                 best_val_loss = val_loss
+                 best_model_wts = copy.deepcopy(model.state_dict())
+                 epochs_no_improve = 0
+                 best_epoch = epoch + 1
+             else:
+                 epochs_no_improve += 1
+                 if epochs_no_improve >= patience:
+                     print(f"Early stopping triggered after {epoch + 1} epochs")
+                     break
+        else:
+             print(f"Epoch {epoch + 1}/{num_epochs}")
+             # Save last weights if no validation
+             best_model_wts = copy.deepcopy(model.state_dict())
+             best_epoch = epoch + 1
+
+    # Load best model weights
+    if best_model_wts:
+        model.load_state_dict(best_model_wts)
+
+    # Final evaluation on test set
+    model.eval()
+    with torch.no_grad():
+        y_true, y_pred = [], []
+        for batch in test_loader:
+            text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+            outputs = model(text, image)
+            if multilabel or (output_size == 1):
+                preds = torch.sigmoid(outputs)
+            else:
+                preds = torch.softmax(outputs, dim=1)
+            y_true.extend(labels.cpu().numpy())
+            y_pred.extend(preds.cpu().numpy())
+
+        y_true, y_pred = np.array(y_true), np.array(y_pred)
+                    
+        if multilabel or (output_size == 1):
+            y_pred_one_hot = (y_pred > 0.5).astype(int)
+        else:
+            predicted_class_indices = np.argmax(y_pred, axis=1)
+            # Convert the predicted class indices to one-hot encoding
+            y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
+            
+        test_accuracy = accuracy_score(y_true, y_pred_one_hot)
+        f1 = f1_score(y_true, y_pred_one_hot, average='macro')
         
-        # Start measuring inference time
-        epoch_start_time = time.time()
-
-        model.eval()
-        with torch.no_grad():
-            y_true, y_pred = [], []
-            for batch in test_loader:
-                text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
-                outputs = model(text, image)
-                if multilabel or (output_size == 1):
-                    preds = torch.sigmoid(outputs)
-                else:
-                    preds = torch.softmax(outputs, dim=1)
-                y_true.extend(labels.numpy())
-                y_pred.extend(preds.numpy())
-
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-                        
-            if multilabel or (output_size == 1):
-                y_pred_one_hot = (y_pred > 0.5).astype(int)
-            else:
-                predicted_class_indices = np.argmax(y_pred, axis=1)
-                # Convert the predicted class indices to one-hot encoding
-                y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
-                #test_model(y_true, (y_pred > 0.5).astype(int))
-                
-            test_accuracy = accuracy_score(y_true, y_pred_one_hot)
-            f1 = f1_score(y_true, y_pred_one_hot, average='macro')
-            test_accuracy_list.append(test_accuracy)
-            f1_accuracy_list.append(f1)
-            # Compute AUC for binary or multi-class classification
-            if multilabel or (output_size == 1):
-                if output_size == 1:  # Binary classification case
-                    auc_scores = roc_auc_score(y_true, y_pred, average=None)
-                else:  # Multi-label classification
-                    try:
-                        auc_scores = roc_auc_score(y_true, y_pred, average=None, multi_class='ovr')
-                    except ValueError:
-                        auc_scores = np.nan  # Handling cases where AUC cannot be computed due to class imbalance
-            else:  # Multi-class classification
+        # Compute AUC for binary or multi-class classification
+        if multilabel or (output_size == 1):
+            if output_size == 1:  # Binary classification case
+                auc_scores = roc_auc_score(y_true, y_pred, average=None)
+            else:  # Multi-label classification
                 try:
-                    auc_scores = roc_auc_score(y_true, y_pred_one_hot, average=None, multi_class='ovr')
+                    auc_scores = roc_auc_score(y_true, y_pred, average=None, multi_class='ovr')
                 except ValueError:
-                    auc_scores = np.nan  # Handling cases where AUC cannot be computed due to class imbalance
-            if output_size == 1:
-                macro_auc = auc_scores
-            else:    
-                macro_auc = np.nanmean(auc_scores)  # Compute macro AUC
+                    auc_scores = np.nan
+        else:  # Multi-class classification
+            try:
+                auc_scores = roc_auc_score(y_true, y_pred_one_hot, average=None, multi_class='ovr')
+            except ValueError:
+                auc_scores = np.nan
+        
+        if output_size == 1:
+            macro_auc = auc_scores
+        else:    
+            macro_auc = np.nanmean(auc_scores)
 
-            
-            if V:
-                print(f"Epoch {epoch + 1}/{num_epochs} - Test Accuracy: {test_accuracy:.4f}, macro-f1: {f1:.4f}, macro-AUC: {macro_auc:.4f}")
-            
-            if best['Acc']['Acc'] < test_accuracy:
-                best['Acc']['Acc'] = test_accuracy
-                best['Acc']['F1'] = f1
-                best['Acc']['Epoch'] = epoch + 1
-                best['Acc']['Auc_Per_Class'] = auc_scores
-                best['Acc']['Auc'] = macro_auc
-                
-            if best['Macro-F1']['F1'] < f1: 
-                best['Macro-F1']['Acc'] = test_accuracy
-                best['Macro-F1']['F1'] = f1
-                best['Macro-F1']['Epoch'] = epoch + 1
-                best['Macro-F1']['Auc_Per_Class'] = auc_scores
-                best['Macro-F1']['Auc'] = macro_auc
-                
-            if best['AUC']['Auc'] < macro_auc:
-                best['AUC']['Acc'] = test_accuracy
-                best['AUC']['F1'] = f1
-                best['AUC']['Auc'] = macro_auc
-                best['AUC']['Epoch'] = epoch + 1
-                best['AUC']['Auc_Per_Class'] = auc_scores
-            
-        # End measuring inference time
-        epoch_end_time = time.time()
-        epoch_inference_time = epoch_end_time - epoch_start_time
-        total_inference_time += epoch_inference_time
         if V:
-            # Print or log the training and inference times for the current epoch
-            print(f"Epoch {epoch + 1}/{num_epochs} - Training Time: {epoch_training_time:.2f} seconds | Inference Time: {epoch_inference_time:.2f} seconds")
+            print(f"Final Test Evaluation (Best Epoch {best_epoch}) - Accuracy: {test_accuracy:.4f}, Macro-F1: {f1:.4f}, Macro-AUC: {macro_auc:.4f}")
 
-    # Calculate average training time per epoch
-    average_training_time_per_epoch = total_training_time / num_epochs
-
-    # Calculate average inference time per epoch
-    average_inference_time_per_epoch = total_inference_time / num_epochs
-
-    print(f"Average Training Time per Epoch: {average_training_time_per_epoch:.2f} seconds")
-    print(f"Total Training Time per Epoch: {total_training_time:.2f} seconds")
-    print(f"Average Inference Time per Epoch: {average_inference_time_per_epoch:.2f} seconds")
-    print(f"Total Inference Time per Epoch: {total_inference_time:.2f} seconds")
-
-    # Plot the accuracy
-    plt.plot(range(1, num_epochs + 1), f1_accuracy_list, label='Test F1')
-    plt.plot(range(1, num_epochs + 1), test_accuracy_list, label='Test Accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.legend()
-    plt.show()
-    
-    if report:
-        # Evaluate the model using the test_model function after training
-        model.eval()
-        with torch.no_grad():
-            y_true, y_pred = [], []
-            for batch in test_loader:
-                text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
-                outputs = model(text, image)
-                if multilabel or (output_size == 1):
-                    preds = torch.sigmoid(outputs)
-                else:
-                    preds = torch.softmax(outputs, dim=1)
-                y_true.extend(labels.numpy())
-                y_pred.extend(preds.numpy())
-
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-            if multilabel or (output_size == 1):
-                y_pred_one_hot = (y_pred > 0.5).astype(int)
-            else:
-                predicted_class_indices = np.argmax(y_pred, axis=1)
-                # Convert the predicted class indices to one-hot encoding
-                y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
-                #test_model(y_true, (y_pred > 0.5).astype(int))
-            accuracy, precision, recall, f1 = test_model(y_true, y_pred_one_hot, V)
+    # Construct best dictionary
+    best = {
+        'Acc': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores},
+        'Macro-F1': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores},
+        'AUC': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores}
+    }
             
-            return accuracy, precision, recall, f1, best
+    if report:
+        accuracy, precision, recall, f1 = test_model(y_true, y_pred_one_hot, V)
+        return accuracy, precision, recall, f1, best
+    else:
+        return test_accuracy, None, None, f1, best
+
             
             
 
 # Function to train late fusion model (similar changes)
-def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, p=0.0, V=True):
+def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, p=0.0, V=True, val_loader=None, patience=5): 
     """
     Train a Late Fusion Model.
 
@@ -781,6 +500,9 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     else:
         class_weights = None
         
+    if class_weights is not None:
+        class_weights = class_weights.to(device)
+
     if multilabel:
         criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     elif(output_size == 1):
@@ -800,25 +522,14 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     
-    best = {
-        'Acc': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []},
-        'Macro-F1': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []},
-        'AUC': {'Acc': 0, 'F1': 0, 'Auc': 0, 'Epoch': 0, 'Auc_Per_Class': []}  # Add this if prioritizing AUC
-    }
-    
-    train_accuracy_list = []
-    test_accuracy_list = []
-    f1_accuracy_list = []
-
-    # Initialize variables to store total training and inference times
-    total_training_time = 0
-    total_inference_time = 0
+       # Early stopping variables
+    best_val_loss = float('inf')
+    epochs_no_improve = 0
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_epoch = 0
 
     for epoch in range(num_epochs):
-                
-        # Start measuring training time
-        epoch_start_time = time.time()
-        
+
         model.train()
         for batch in train_loader:
             text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
@@ -828,144 +539,101 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
             loss.backward()
             optimizer.step()
                         
-        # End measuring training time
-        epoch_end_time = time.time()
-        epoch_training_time = epoch_end_time - epoch_start_time
-        total_training_time += epoch_training_time
-        
-        # Start measuring inference time
-        epoch_start_time = time.time()
+        # Validation for early stopping
+        if val_loader:
+             model.eval()
+             val_loss = 0.0
+             with torch.no_grad():
+                 for batch in val_loader:
+                     text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+                     outputs = model(text, image)
+                     loss = criterion(outputs, labels)
+                     val_loss += loss.item() * text.size(0)
+             
+             val_loss = val_loss / len(val_loader.dataset)
+             print(f"Epoch {epoch + 1}/{num_epochs} - Validation Loss: {val_loss:.4f}")
+             
+             if val_loss < best_val_loss:
+                 best_val_loss = val_loss
+                 best_model_wts = copy.deepcopy(model.state_dict())
+                 epochs_no_improve = 0
+                 best_epoch = epoch + 1
+             else:
+                 epochs_no_improve += 1
+                 if epochs_no_improve >= patience:
+                     print(f"Early stopping triggered after {epoch + 1} epochs")
+                     break
+        else:
+             print(f"Epoch {epoch + 1}/{num_epochs}")
+             # Save last weights if no validation
+             best_model_wts = copy.deepcopy(model.state_dict())
+             best_epoch = epoch + 1
 
-        model.eval()
-        with torch.no_grad():
-            y_true, y_pred = [], []
-            for batch in test_loader:
-                text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
-                outputs = model(text, image)
-                if multilabel or (output_size == 1):
-                    preds = torch.sigmoid(outputs)
-                else:
-                    preds = torch.softmax(outputs, dim=1)
-                y_true.extend(labels.numpy())
-                y_pred.extend(preds.numpy())
+    # Load best model weights
+    if best_model_wts:
+        model.load_state_dict(best_model_wts)
 
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-            
+    # Final evaluation on test set
+    model.eval()
+    with torch.no_grad():
+        y_true, y_pred = [], []
+        for batch in test_loader:
+            text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+            outputs = model(text, image)
             if multilabel or (output_size == 1):
-                y_pred_one_hot = (y_pred > 0.5).astype(int)
+                preds = torch.sigmoid(outputs)
             else:
-                predicted_class_indices = np.argmax(y_pred, axis=1)
-                # Convert the predicted class indices to one-hot encoding
-                y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
-                #test_model(y_true, (y_pred > 0.5).astype(int))
-                
-            test_accuracy = accuracy_score(y_true, y_pred_one_hot)
-            f1 = f1_score(y_true, y_pred_one_hot, average='macro')
-            test_accuracy_list.append(test_accuracy)
-            f1_accuracy_list.append(f1)
+                preds = torch.softmax(outputs, dim=1)
+            y_true.extend(labels.cpu().numpy())
+            y_pred.extend(preds.cpu().numpy())
+
+        y_true, y_pred = np.array(y_true), np.array(y_pred)
+        
+        if multilabel or (output_size == 1):
+            y_pred_one_hot = (y_pred > 0.5).astype(int)
+        else:
+            predicted_class_indices = np.argmax(y_pred, axis=1)
+            # Convert the predicted class indices to one-hot encoding
+            y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
             
-            # Compute AUC for binary or multi-class classification
-            if multilabel or (output_size == 1):
-                if output_size == 1:  # Binary classification case
-                    auc_scores = roc_auc_score(y_true, y_pred, average=None)
-                else:  # Multi-label classification
-                    try:
-                        auc_scores = roc_auc_score(y_true, y_pred, average=None, multi_class='ovr')
-                    except ValueError:
-                        auc_scores = np.nan  # Handling cases where AUC cannot be computed due to class imbalance
-            else:  # Multi-class classification
+        test_accuracy = accuracy_score(y_true, y_pred_one_hot)
+        f1 = f1_score(y_true, y_pred_one_hot, average='macro')
+        
+        # Compute AUC for binary or multi-class classification
+        if multilabel or (output_size == 1):
+            if output_size == 1:  # Binary classification case
+                auc_scores = roc_auc_score(y_true, y_pred, average=None)
+            else:  # Multi-label classification
                 try:
-                    auc_scores = roc_auc_score(y_true, y_pred_one_hot, average=None, multi_class='ovr')
+                    auc_scores = roc_auc_score(y_true, y_pred, average=None, multi_class='ovr')
                 except ValueError:
-                    auc_scores = np.nan  # Handling cases where AUC cannot be computed due to class imbalance
-            if output_size == 1:
-                macro_auc = auc_scores
-            else:    
-                macro_auc = np.nanmean(auc_scores)  # Compute macro AUC
+                    auc_scores = np.nan
+        else:  # Multi-class classification
+            try:
+                auc_scores = roc_auc_score(y_true, y_pred_one_hot, average=None, multi_class='ovr')
+            except ValueError:
+                auc_scores = np.nan
+        
+        if output_size == 1:
+            macro_auc = auc_scores
+        else:    
+            macro_auc = np.nanmean(auc_scores)
 
-            
-            if V:
-                print(f"Epoch {epoch + 1}/{num_epochs} - Test Accuracy: {test_accuracy:.4f}, macro-f1: {f1:.4f}, macro-AUC: {macro_auc:.4f}")
-            
-            if best['Acc']['Acc'] < test_accuracy:
-                best['Acc']['Acc'] = test_accuracy
-                best['Acc']['F1'] = f1
-                best['Acc']['Epoch'] = epoch + 1
-                best['Acc']['Auc_Per_Class'] = auc_scores
-                best['Acc']['Auc'] = macro_auc
-                
-            if best['Macro-F1']['F1'] < f1: 
-                best['Macro-F1']['Acc'] = test_accuracy
-                best['Macro-F1']['F1'] = f1
-                best['Macro-F1']['Epoch'] = epoch + 1
-                best['Macro-F1']['Auc_Per_Class'] = auc_scores
-                best['Macro-F1']['Auc'] = macro_auc
-                
-            if best['AUC']['Auc'] < macro_auc:
-                best['AUC']['Acc'] = test_accuracy
-                best['AUC']['F1'] = f1
-                best['AUC']['Auc'] = macro_auc
-                best['AUC']['Epoch'] = epoch + 1
-                best['AUC']['Auc_Per_Class'] = auc_scores
-            
-            
-        
-        # End measuring inference time
-        epoch_end_time = time.time()
-        epoch_inference_time = epoch_end_time - epoch_start_time
-        total_inference_time += epoch_inference_time
-        
-        # Print or log the training and inference times for the current epoch
         if V:
-            print(f"Epoch {epoch + 1}/{num_epochs} - Training Time: {epoch_training_time:.2f} seconds | Inference Time: {epoch_inference_time:.2f} seconds")
+            print(f"Final Test Evaluation (Best Epoch {best_epoch}) - Accuracy: {test_accuracy:.4f}, Macro-F1: {f1:.4f}, Macro-AUC: {macro_auc:.4f}")
 
-    # Calculate average training time per epoch
-    average_training_time_per_epoch = total_training_time / num_epochs
-
-    # Calculate average inference time per epoch
-    average_inference_time_per_epoch = total_inference_time / num_epochs
-
-    print(f"Average Training Time per Epoch: {average_training_time_per_epoch:.2f} seconds")
-    print(f"Total Training Time per Epoch: {total_training_time:.2f} seconds")
-    print(f"Average Inference Time per Epoch: {average_inference_time_per_epoch:.2f} seconds")
-    print(f"Total Inference Time per Epoch: {total_inference_time:.2f} seconds")
-
-    # Plot the accuracy
-    plt.plot(range(1, num_epochs + 1), f1_accuracy_list, label='Test F1')
-    plt.plot(range(1, num_epochs + 1), test_accuracy_list, label='Test Accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.legend()
-    plt.show()
-    
+    # Construct best dictionary
+    best = {
+        'Acc': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores},
+        'Macro-F1': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores},
+        'AUC': {'Acc': test_accuracy, 'F1': f1, 'Auc': macro_auc, 'Epoch': best_epoch, 'Auc_Per_Class': auc_scores}
+    }
+            
     if report:
-        # Evaluate the model using the test_model function after training
-        model.eval()
-        with torch.no_grad():
-            y_true, y_pred = [], []
-            for batch in test_loader:
-                text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
-                outputs = model(text, image)
-                if multilabel or (output_size == 1):
-                    preds = torch.sigmoid(outputs)
-                else:
-                    preds = torch.softmax(outputs, dim=1)
-                y_true.extend(labels.numpy())
-                y_pred.extend(preds.numpy())
-                
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-            
-            if multilabel or (output_size == 1):
-                y_pred_one_hot = (y_pred > 0.5).astype(int)
-            else:
-                predicted_class_indices = np.argmax(y_pred, axis=1)
-                # Convert the predicted class indices to one-hot encoding
-                y_pred_one_hot = np.eye(y_pred.shape[1])[predicted_class_indices]
-                #test_model(y_true, (y_pred > 0.5).astype(int))
-
-            accuracy, precision, recall, f1 = test_model(y_true, y_pred_one_hot, V)
-            
-            return accuracy, precision, recall, f1, best
+        accuracy, precision, recall, f1 = test_model(y_true, y_pred_one_hot, V)
+        return accuracy, precision, recall, f1, best
+    else:
+        return test_accuracy, None, None, f1, best
             
 # Function to evaluate classic ML model
 def evaluate_classic_ml_model(model_name, y_true, y_pred, train_columns):

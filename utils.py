@@ -45,8 +45,11 @@ def modify_and_normalize_embeddings(text_embeddings, image_embeddings, lambda_sh
     return text_embeddings_shifted, image_embeddings_shifted
 
 
-def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift, DATASET, save=True, var=False):
+def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift, DATASET, save=True, var=False, output_dir=None):
     """Visualize embeddings in 2D and 3D, including the unit circle and sphere."""
+    if output_dir is None:
+        output_dir = f'Images/{DATASET}'
+
     pca = PCA(n_components=2)
     all_embeddings = np.concatenate([text_embeddings, image_embeddings])
     reduced_embeddings = pca.fit_transform(all_embeddings)
@@ -80,7 +83,7 @@ def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift,
     plt.ylim(-1.1, 1.1)
     plt.gca().set_aspect('equal', adjustable='box')
     
-    img_path_2d = f'Images/{DATASET}/2d_shift({lambda_shift}).pdf'
+    img_path_2d = os.path.join(output_dir, f'2d_shift({lambda_shift}).pdf')
     if save:
         os.makedirs(os.path.dirname(img_path_2d), exist_ok=True)
         plt.savefig(img_path_2d)
@@ -110,13 +113,16 @@ def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift,
     ax.set_zlabel('PCA Component 3', labelpad=10)
     plt.legend()
     
-    img_path_3d = f'Images/{DATASET}/3d_shift({lambda_shift}).pdf'
+    img_path_3d = os.path.join(output_dir, f'3d_shift({lambda_shift}).pdf')
     if save:
         os.makedirs(os.path.dirname(img_path_3d), exist_ok=True)
         plt.savefig(img_path_3d)
     plt.show()
 
-def plot_results(results, lambda_shift_values, DATASET):
+def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
+    if output_dir is None:
+        output_dir = f'Images/{DATASET}'
+
     # Extracting F1 and Accuracy values for early and late fusion models
     early_f1 = [results[f'early_({lambda_shift})']['Macro-F1']['F1'] for lambda_shift in lambda_shift_values]
     late_f1 = [results[f'late_({lambda_shift})']['Macro-F1']['F1'] for lambda_shift in lambda_shift_values]
@@ -165,7 +171,7 @@ def plot_results(results, lambda_shift_values, DATASET):
 
     plt.tight_layout()
     
-    img_path_metrics = f'Images/{DATASET}/Metrics.pdf'
+    img_path_metrics = os.path.join(output_dir, 'Metrics.pdf')
     os.makedirs(os.path.dirname(img_path_metrics), exist_ok=True)
     plt.savefig(img_path_metrics)
     

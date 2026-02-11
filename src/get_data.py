@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from tqdm import tqdm as tqdm
 import urllib.request
 import numpy as np
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 import time
 import matplotlib.pyplot as plt
 import subprocess
@@ -201,70 +201,89 @@ def get_cocoqa_dataset(output_dir="data/"):
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
+    qa_train_exists = os.path.exists(os.path.join(output_dir, "train"))
+    qa_test_exists = os.path.exists(os.path.join(output_dir, "test"))
+    images_dir = os.path.join(output_dir, "images")
+    images_ready = os.path.exists(images_dir) and len(os.listdir(images_dir)) > 0
+    zip_file_path = os.path.join(output_dir, "cocoqa-2015-05-17.zip")
+
     try:
         # Download and uncompress COCO-QA dataset
-        url = "http://www.cs.toronto.edu/~mren/imageqa/data/cocoqa/cocoqa-2015-05-17.zip"
-        zip_file_path = os.path.join(output_dir, "cocoqa-2015-05-17.zip")
+        if not (qa_train_exists and qa_test_exists):
+            print("Downloading/Extracting COCO-QA dataset...")
+            if not os.path.exists(zip_file_path):
+                url = "http://www.cs.toronto.edu/~mren/imageqa/data/cocoqa/cocoqa-2015-05-17.zip"
+                response = requests.get(url, stream=True)
+                response.raise_for_status()
 
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
+                with open(zip_file_path, "wb") as zip_file:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        zip_file.write(chunk)
 
-        with open(zip_file_path, "wb") as zip_file:
-            for chunk in response.iter_content(chunk_size=8192):
-                zip_file.write(chunk)
+            with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
+                zip_ref.extractall(output_dir)
 
-        with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
-            zip_ref.extractall(output_dir)
-
-        print("COCO-QA dataset downloaded and uncompressed successfully.")
+            print("COCO-QA dataset downloaded and uncompressed successfully.")
+            # Remove the downloaded zip file for COCO-QA dataset
+            if os.path.exists(zip_file_path):
+                os.remove(zip_file_path)
+        else:
+             print("COCO-QA QA text data already exists. Skipping download.")
 
         # Create 'images' directory and download COCO images
-        images_dir = os.path.join(output_dir, "images")
-
         os.makedirs(images_dir, exist_ok=True)
 
-        image_urls = [
-            "http://images.cocodataset.org/zips/train2017.zip",
-            "http://images.cocodataset.org/zips/val2017.zip"
-        ]
+        if not images_ready:
+            print("Downloading/Extracting COCO images...")
+            image_urls = [
+                "http://images.cocodataset.org/zips/train2017.zip",
+                "http://images.cocodataset.org/zips/val2017.zip"
+            ]
+
+            for url in image_urls:
+                image_zip_file_path = os.path.join(images_dir, os.path.basename(url))
+                
+                if not os.path.exists(image_zip_file_path):
+                    print(f"Downloading {os.path.basename(url)}...")
+                    response = requests.get(url, stream=True)
+                    response.raise_for_status()
+
+                    with open(image_zip_file_path, "wb") as zip_file:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            zip_file.write(chunk)
+
+                print(f"Extracting {os.path.basename(url)}...")
+                with zipfile.ZipFile(image_zip_file_path, "r") as zip_ref:
+                    zip_ref.extractall(images_dir)
+
+                # Remove the downloaded zip file for images
+                os.remove(image_zip_file_path)
 
 
-        for url in image_urls:
-            image_zip_file_path = os.path.join(images_dir, os.path.basename(url))
-            response = requests.get(url, stream=True)
-            response.raise_for_status()
+            print("COCO images downloaded and uncompressed successfully.")
+            
+            # Move all the files from images/train2017 and images/val2017 to images/
+            for folder in ["train2017", "val2017"]:
+                src_folder = os.path.join(images_dir, folder)
+                if os.path.exists(src_folder):
+                    for file_name in os.listdir(src_folder):
+                        src_path = os.path.join(src_folder, file_name)
+                        dst_path = os.path.join(images_dir, file_name)
+                        shutil.move(src_path, dst_path)
 
-            with open(image_zip_file_path, "wb") as zip_file:
-                for chunk in response.iter_content(chunk_size=8192):
-                    zip_file.write(chunk)
-
-            with zipfile.ZipFile(image_zip_file_path, "r") as zip_ref:
-                zip_ref.extractall(images_dir)
-
-            # Remove the downloaded zip file for images
-            os.remove(image_zip_file_path)
-
-
-        print("COCO images downloaded and uncompressed successfully.")
-        
-        # Move all the files from images/train2017 and images/val2017 to images/
-        for folder in ["train2017", "val2017"]:
-            src_folder = os.path.join(images_dir, folder)
-            for file_name in os.listdir(src_folder):
-                src_path = os.path.join(src_folder, file_name)
-                dst_path = os.path.join(images_dir, file_name)
-                shutil.move(src_path, dst_path)
-
-            # Remove the 'train2017/' and 'val2017/' directories
-            os.rmdir(src_folder)
+                    # Remove the 'train2017/' and 'val2017/' directories
+                    os.rmdir(src_folder)
+        else:
+            print("COCO images directory already populated. Skipping images download.")
 
     except requests.RequestException as e:
         print(f"Error: {e}")
     except zipfile.BadZipFile as e:
         print(f"Error uncompressing the dataset: {e}")
     finally:
-        # Remove the downloaded zip file for COCO-QA dataset
-        os.remove(zip_file_path)
+        # Remove the downloaded zip file for COCO-QA dataset if it exists
+        if os.path.exists(zip_file_path):
+            os.remove(zip_file_path)
 
 
 def process_cocoqa_data(output_dir="data/"):
@@ -382,6 +401,11 @@ def download_fakeddit_files(out_dir='dataset/'):
     for file_name, file_url in file_urls.items():
         # Download the file
         output_file = os.path.join(out_dir, f'{file_name}.tsv')
+        
+        if os.path.exists(output_file):
+            print(f"File {output_file} already exists. Skipping download.")
+            continue
+            
         gdown.download(file_url, output_file, quiet=False)
 
         
@@ -395,8 +419,8 @@ def download_full_set_images(out_dir='images/'):
                               Default is 'images/'.
 
     Notes:
-    - The function downloads the 'public_images.tar.bz2' file from the specified Google Drive link
-      and extracts its contents into the specified output directory.
+    - The function downloads the 'public_images.tar.bz2' file from the specified Google Drive link.
+      Extraction continues in create_stratified_subset_fakeddit to save space.
 
     Example:
     ```python
@@ -414,16 +438,12 @@ def download_full_set_images(out_dir='images/'):
     
     # Download the tar.bz2 file
     tar_file = os.path.join(out_dir, 'Images.tar.bz2')
-    gdown.download(file_url, tar_file, quiet=False)
-
-    # Extract the contents of the tar.bz2 file
-    with tarfile.open(tar_file, 'r:bz2') as tar:
-        tar.extractall(out_dir)
-        
-    os.rename(os.path.join(out_dir, 'public_image_set'), os.path.join(out_dir, 'images'))
-
-    # Remove the tar.bz2 file after extraction
-    os.remove(tar_file)
+    
+    if not os.path.exists(tar_file):
+        print(f"Downloading {tar_file}...")
+        gdown.download(file_url, tar_file, quiet=False)
+    else:
+        print(f"{tar_file} already exists. Skipping download.")
 
 
 def create_stratified_subset_fakeddit(root_path, subset_size, verify=False):
@@ -466,6 +486,11 @@ def create_stratified_subset_fakeddit(root_path, subset_size, verify=False):
     if not os.path.exists(root_path):
         raise FileNotFoundError(f"The root path {root_path} does not exist.")
 
+    # Check if labels.csv already exists to prevent generating a new random subset
+    if os.path.exists(os.path.join(root_path, 'labels.csv')):
+        print(f"labels.csv already exists in {root_path}. Skipping generation to resume download.")
+        return
+
     # Define the file names
     train_file = os.path.join(root_path, 'train.tsv')
     test_file = os.path.join(root_path, 'test.tsv')
@@ -498,6 +523,45 @@ def create_stratified_subset_fakeddit(root_path, subset_size, verify=False):
     result_df = pd.concat([train_subset, test_subset, val_subset], ignore_index=True)
     
     result_df['id'] = result_df['id'].astype(str) + '.jpg'
+
+    # EXTRACT IMAGES ONE BY ONE (If tar exists)
+    tar_path = os.path.join(root_path, 'Images.tar.bz2')
+    if os.path.exists(tar_path):
+        print(f"Extracting subset images from {tar_path}...")
+        
+        # Determine images to extract
+        images_to_extract = set(result_df['id'].unique())
+        
+        # Prepare destination
+        dest_images_dir = os.path.join(root_path, 'images')
+        os.makedirs(dest_images_dir, exist_ok=True)
+        
+        extracted_count = 0
+        
+        # Open tar and filter members
+        with tarfile.open(tar_path, 'r:bz2') as tar:
+            def members_generator(tar_obj):
+                nonlocal extracted_count
+                for member in tar_obj:
+                    # Check if file is in our list
+                    # Structure in tar is usually 'public_image_set/filename.jpg'
+                    basename = os.path.basename(member.name)
+                    if basename in images_to_extract:
+                        extracted_count += 1
+                        yield member
+            
+            tar.extractall(path=root_path, members=members_generator(tar))
+            
+        print(f"Extracted {extracted_count} images.")
+
+        # Move files from 'public_image_set' to 'images'
+        extracted_folder = os.path.join(root_path, 'public_image_set')
+        if os.path.exists(extracted_folder):
+            for filename in os.listdir(extracted_folder):
+                shutil.move(os.path.join(extracted_folder, filename), os.path.join(dest_images_dir, filename))
+            shutil.rmtree(extracted_folder)
+    else:
+        print(f"Warning: {tar_path} not found. Skipping extraction.")
     
     if verify:
         # Get the list of image filenames in the 'images' folder
@@ -511,9 +575,11 @@ def create_stratified_subset_fakeddit(root_path, subset_size, verify=False):
     result_df.to_csv(os.path.join(root_path, 'labels.csv'), index=False)
 
 
+
 def download_images_from_file(root, labels_name='labels.csv', max_retries=3, delay_seconds=2):
     """
     Download images from URLs specified in a dataframe and save them in an 'images' directory.
+    Also performs repair of double extensions (.jpg.jpg) and verifies the final dataset.
 
     Parameters:
     - root (str): The root path to the directory containing the labels file and where the 'images' directory will be created.
@@ -557,6 +623,7 @@ def download_images_from_file(root, labels_name='labels.csv', max_retries=3, del
 
     labels_path = os.path.join(root, labels_name)
     images_path = os.path.join(root, "images")
+    os.makedirs(images_path, exist_ok=True)
 
     if labels_path.endswith('.csv'):
         df = pd.read_csv(labels_path)
@@ -568,16 +635,38 @@ def download_images_from_file(root, labels_name='labels.csv', max_retries=3, del
 
     pbar = tqdm(total=len(df))
 
-    # Create the output directory if it doesn't exist
-    os.makedirs(images_path, exist_ok=True)
+    # Optimization: Read all existing files into memory once to skip already processed chunks
+    print("Checking for existing files to resume download...")
+    existing_files = set(os.listdir(images_path))
+    last_downloaded_idx = -1
+    
+    # We iterate partially to find the resume point
+    temp_ids = df['id'].astype(str).values
+    for idx, raw_id in enumerate(temp_ids):
+        # Handle ID with or without extension
+        fname = raw_id if raw_id.endswith('.jpg') else raw_id + '.jpg'
+        if fname in existing_files:
+            last_downloaded_idx = idx
+            
+    if last_downloaded_idx != -1:
+        skip_count = last_downloaded_idx + 1
+        print(f"Resuming download from index {skip_count}.")
+        pbar.update(skip_count)
+        df_to_process = df.iloc[skip_count:]
+    else:
+        df_to_process = df
 
-    for index, row in df.iterrows():
+    for index, row in df_to_process.iterrows():
         if row["hasImage"] == True and row["image_url"] != "" and row["image_url"] != "nan":
             image_url = row["image_url"]
-            image_name = row["id"] + ".jpg"
+            
+            # Robust ID handling
+            raw_id = str(row["id"])
+            image_name = raw_id if raw_id.endswith('.jpg') else raw_id + ".jpg"
+            
             image_path = os.path.join(images_path, image_name)
             
-            if os.path.exists(image_path):
+            if os.path.exists(image_path) and os.path.getsize(image_path) > 0:
                 pbar.update(1)
                 continue
 
@@ -585,23 +674,62 @@ def download_images_from_file(root, labels_name='labels.csv', max_retries=3, del
             while retry_count < max_retries:
                 try:
                     urllib.request.urlretrieve(image_url, image_path)
-                    #print(f"Image '{image_name}' downloaded successfully.")
                     break
-                except HTTPError as e:
-                    if e.code == 429:  # Too Many Requests
-                        # print(f"Rate limit exceeded. Retrying in {delay_seconds} seconds...")
+                except Exception as e:
+                    if isinstance(e, HTTPError) and e.code == 429:  # Too Many Requests
                         time.sleep(delay_seconds)
-                        retry_count += 1
-                    else:
-                        # print(f"Failed to download image '{image_name}'. HTTP Error: {e.code}")
-                        break
+                    retry_count += 1
             else:
-                print(f"Failed to download image '{image_name}' after {max_retries} retries.")
+                pass # Silently fail here, will be cleaned up in verification step
 
         pbar.update(1)
     print("done")
-
     
+    # --- REPAIR STEP: Fix .jpg.jpg double extensions ---
+    # This mirrors the logic in process_fakeddit_labels.ipynb to fix manual/previous errors
+    print("Auditing image directory for double extensions...")
+    if os.path.exists(images_path):
+        files = os.listdir(images_path)
+        double_ext_files = [f for f in files if f.endswith('.jpg.jpg')]
+        if double_ext_files:
+            print(f"Found {len(double_ext_files)} files with .jpg.jpg extension. Renaming...")
+            for f in double_ext_files:
+                src = os.path.join(images_path, f)
+                dst = os.path.join(images_path, f[:-4]) # Remove last .jpg
+                if not os.path.exists(dst):
+                    os.rename(src, dst)
+                else:
+                    # If valid .jpg already exists, remove the double ext one
+                    os.remove(src)
+
+    # Clean the dataframe by removing rows where images failed to download
+    print("Verifying downloaded images and cleaning labels...")
+    initial_count = len(df)
+    
+    def is_valid_row(row):
+        # Multifodal check: Every row MUST have a valid and downloaded image
+        if row["hasImage"] == True and row["image_url"] != "" and row["image_url"] != "nan":
+            raw_id = str(row["id"])
+            image_name = raw_id if raw_id.endswith('.jpg') else raw_id + ".jpg"
+            image_path = os.path.join(images_path, image_name)
+            return os.path.exists(image_path) and os.path.getsize(image_path) > 0
+        return False 
+
+    df_clean = df[df.apply(is_valid_row, axis=1)]
+    final_count = len(df_clean)
+    
+    if final_count < initial_count:
+        print(f"Removed {initial_count - final_count} rows due to failed/missing downloads. Final dataset size: {final_count} rows.")
+        if labels_name.endswith('.csv'):
+            df_clean.to_csv(labels_path, index=False)
+        else:
+            df_clean.to_csv(labels_path, sep="\t", index=False)
+        print(f"Cleaned labels saved to {labels_path}")
+    else:
+        print("All images verified successfully. No rows removed.")
+
+
+
 ########### Recipes5k ###########
 
 def download_recipes5k_dataset(out_dir='output/'):
@@ -927,22 +1055,32 @@ def mbrset_preprocessing(dataset_path, filename='labels.csv', output_filename='l
     print(f"Processed dataset saved as {output_filename} in {dataset_path}")
 
 
-
 ########### ham10000 ###########
-def preprocess_ham10000(path, dir1='HAM10000_images_part_1', dir2='HAM10000_images_part_2', labels='HAM10000_metadata.csv'):
+def preprocess_ham10000(path, dir1='HAM10000_images_part_1', dir2='HAM10000_images_part_2', labels='HAM10000_metadata.tab', force_image_processing=False):
     # Create images directory if not exists
     images_dir = os.path.join(path, 'images')
-    os.makedirs(images_dir, exist_ok=True)
+
+    # Verify if image_dir exists and has images, if not, process the images
+    if not os.path.exists(images_dir) or len(os.listdir(images_dir)) == 0 or force_image_processing:
+        print(f"Processing images from {dir1} and {dir2} into {images_dir}...")
+        os.makedirs(images_dir, exist_ok=True)
     
-    # Move images from dir1 and dir2 to images directory
-    for directory in [dir1, dir2]:
-        full_dir = os.path.join(path, directory)
-        for filename in os.listdir(full_dir):
-            shutil.move(os.path.join(full_dir, filename), images_dir)
+        # Move images from dir1 and dir2 to images directory
+        for directory in [dir1, dir2]:
+            full_dir = os.path.join(path, directory)
+            for filename in os.listdir(full_dir):
+                shutil.move(os.path.join(full_dir, filename), images_dir)
+    else:
+        print(f"Images already processed in {images_dir}. Skipping image processing. Use force_image_processing=True to reprocess images if needed.")
     
     # Load CSV file
     labels_path = os.path.join(path, labels)
     df = pd.read_csv(labels_path)
+
+    #print("#"*50)
+    #print(f'columns in the dataset: {df.columns}')
+    #print(df)
+    #print("#"*50)
     
     # Create 'text' column with prompt template
     df['text'] = df.apply(lambda row: f"Patient diagnosed via {row['dx_type']}. Age: {'No data reported' if pd.isnull(row['age']) else int(row['age'])} years. Sex: {row['sex'] if pd.notnull(row['sex']) else 'No data reported'}. Localization: {row['localization'] if pd.notnull(row['localization']) else 'No data reported'}.", axis=1)
@@ -1438,101 +1576,6 @@ def satellitedata_preprocessing(output_path='datasets/satellitedata', num_classe
         print(f"Processed dataset saved as {output_filename} in {dataset_path}")
 
         return df_final
-
-
-def joslin_preprocessing(dataset_path, filename='labels.csv', output_filename='labels.csv'):
-    # Load the dataset
-    df = pd.read_csv(f'{dataset_path}/{filename}')
-
-    # Define the conversion functions
-    def convert_eye(eye):
-        return 'right' if eye == 'R' else 'left' if eye == 'L' else 'no eye reported'
-
-    def convert_sex(sex):
-        return 'male' if sex == 'M' else 'female' if sex == 'F' else 'no sex reported'
-
-    def convert_ethnicity(ethnicity):
-        return 'declined to specify ethnicity' if str(ethnicity).strip() == 'Declined to specify' else \
-            '' if str(ethnicity).strip() == 'nan' else str(ethnicity).strip()
-
-    def convert_diabetes_type(diabetes_type):
-        return '' if str(diabetes_type).strip() == 'nan' else str(diabetes_type).strip()
-
-    def convert_visual_acuity(VA):
-        return 'hand motion' if str(VA).strip() == 'HM' else \
-            'counting fingers' if str(VA).strip() == 'CF' else \
-            'light perception' if str(VA).strip() == 'LP' else \
-            'no light perception' if str(VA).strip() == 'NLP' else \
-            'value missing' if str(VA).strip() == 'nan' else VA
-
-    def convert_lens_status(status):
-        return '' if str(status).strip() == 'nan' else str(status).strip()
-
-    def convert_presence(presence):
-        return 'present' if presence == 1 else 'absent' if presence == 0 else 'not recorded'
-
-    def convert_positive_status(status):
-        return 'positive' if status == 1 else 'negative' if status == 2 \
-            else 'not recorded' if status == 0 else 'value missing'
-
-    def convert_detailed_status(status):
-        return 'present' if str(status) == '1' else 'absent' if str(status) == '0.0' \
-            else 'value missing' if str(status) == 'nan' else str(status)
-
-    # Create the 'text' column with conditions
-    df['text'] = df.apply(lambda row: (
-        f"An image from the {convert_eye(row['LATERALITY'])} eye of a {convert_sex(row['SEX'])} {convert_ethnicity(row['U_ETHNIC_GROUP'])} patient, "
-        f"aged {'no age reported' if pd.isnull(row['PT_AGE']) else str(float(str(row['PT_AGE']).replace('O', '0').replace(',', '.')))} years, "
-        f"with {convert_diabetes_type(row['DM_TYPE'])} diabetes {convert_presence(row['DIABETIC'])}, "
-        f"{'' if pd.isnull(row['YEARS_W_DZ']) or row['YEARS_W_DZ'] <= 0 else 'diagnosed for ' + str(float(str(row['YEARS_W_DZ']).replace('O', '0').replace(',', '.'))) + ' years'}, "
-        f"{'' if pd.isnull(row['AGE_W_DIAG']) or row['AGE_W_DIAG'] < 0 else 'and was first diagnosed at age ' + str(float(str(row['AGE_W_DIAG']).replace('O', '0').replace(',', '.')))}. "
-        f"Comorbidities include diabetic macular edema (DME): {convert_presence(row['EYE_DME'])}, " 
-        f"hypertension: {convert_positive_status(row['HYPERTENSION'])}, "
-        f"high_cholesterol: {convert_positive_status(row['HIGH_CHOLESTEROL'])}, "
-        f"cardiac problems: {convert_positive_status(row['CARDIAC_PROBLEMS'])}, "
-        f"neuropathy: {convert_positive_status(row['NEUROPATHY'])}, "
-        f"renal disease: {convert_positive_status(row['RENAL_DISEASE'])}, "
-        f"and anemia: {convert_positive_status(row['ANEMIA'])}. "
-        f"Eye conditions include best visual acuity (VA): {convert_visual_acuity(row['BEST_VA'])}, "
-        f"eye lens status: {convert_lens_status(row['LENS_STATUS'])}, "
-        f"new vessels elsewhere quiescent proliferative diabetic retinopathy: {convert_presence(row['NVE_QUIESC_PDR'])}, "
-        f"retinal laser scars: {convert_presence(row['RET_LASERSCAR'])}, "
-        f"and vitreous hemorrhage: {convert_presence(row['VITREOUS_HEME'])}. "
-        f"Other eye conditions with detailed information include retina thickening: {convert_detailed_status(row['THICKENING'])}, "
-        f"hemorrhages and microaneurysms: {convert_detailed_status(row['HEME_MA'])}, "
-        f"venous beading: {convert_detailed_status(row['VENOUS_BEAD'])}, "
-        f"intraretinal microvascular abnormalities: {convert_detailed_status(row['IRMA'])}, "
-        f"new vessels on the disc: {convert_detailed_status(row['NVD'])}, "
-        f"and new vessels elsewhere: {convert_detailed_status(row['NVE'])}."
-    ), axis=1)
-
-    # Drop all columns except for 'image_id', 'DR_ICDR', and 'text'
-    df = df[['ID', 'EYE_DR', 'text']]
-
-    # Create DR_2 and DR_3 columns from DR_ICDR
-    df['DR_2'] = df['EYE_DR'].apply(lambda x: 1 if x > 0 else 0)
-    df['DR_3'] = df['EYE_DR'].apply(lambda x: 2 if x == 4 else (1 if x in [1, 2, 3] else 0))
-
-    # Create a 'split' column
-    df['split'] = 'train'  # Initialize all as 'train'
-    # Stratify split by 'EYE_DR'
-    train_idx, test_idx = train_test_split(df.index, test_size=0.2, stratify=df['EYE_DR'], random_state=42)
-    df.loc[test_idx, 'split'] = 'test'  # Update 'split' for test set
-
-    # Save the processed dataframe to a new CSV file
-    df.to_csv(f'{dataset_path}/{output_filename}', index=False)
-
-    print(f"Processed dataset saved as {output_filename} in {dataset_path}")
-
-
-
-
-
-
-
-
-
-
 
 
 def generate_patient_text(row):

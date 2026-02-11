@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import numpy as np
 from tqdm.auto import tqdm
+from vlm_utils import VLMDataset, blip2_collate_fn, llava_collate_fn, clip_collate_fn
 
 from torchvision.transforms import Resize, Compose, ToTensor
 
@@ -18,30 +19,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 import warnings
 warnings.filterwarnings("ignore")
 
-
-class CLIPDataset(Dataset):
-    def __init__(self, dataframe, image_col, text_col, image_path=None, processor=None):
-        self.dataframe = dataframe
-        self.image_col = image_col
-        self.text_col = text_col
-        self.image_path = image_path
-        self.processor = processor
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        row = self.dataframe.iloc[idx]
-        text = row[self.text_col]
-        image_file = os.path.join(self.image_path if self.image_path else '', row[self.image_col])
-        image = Image.open(image_file).convert("RGB")
-        return {"text": text, "image": image}
-
-def custom_collate_fn(batch, processor):
-    texts = [item["text"] for item in batch]
-    images = [item["image"] for item in batch]
-    processed = processor(text=texts, images=images, return_tensors="pt", padding=True, truncation=True)
-    return processed
 
 class CLIP:
     def __init__(self, model_name="openai/clip-vit-base-patch32"):
@@ -56,8 +33,8 @@ class CLIP:
             raise ValueError("Invalid device name. Please provide 'cuda' or 'cpu'.")
         
         device = torch.device(device)
-        dataset = CLIPDataset(dataframe, image_col_name, text_col_name, image_path, self.processor)
-        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: custom_collate_fn(x, self.processor))
+        dataset = VLMDataset(dataframe, image_col_name, text_col_name, image_path)
+        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: clip_collate_fn(x, self.processor))
 
         # Initialize lists to store embeddings
         image_embeddings_list = []
@@ -67,8 +44,12 @@ class CLIP:
         for batch in tqdm(dataloader, desc="Processing batches"):
             with torch.no_grad():
                 self.model.to(device)
-                batch = batch.to(device)
-                outputs = self.model(**batch)
+                batch = {k: v.to(device) for k, v in batch.items()}
+                
+                # Removing image_paths from inputs
+                inputs = {k: v for k, v in batch.items() if k != 'image_paths'}
+
+                outputs = self.model(**inputs)
             image_embeddings_list.append(outputs.image_embeds.cpu().numpy())
             text_embeddings_list.append(outputs.text_embeds.cpu().numpy())
 
@@ -89,32 +70,6 @@ class CLIP:
         return concatenated_df
 
 
-class BLIP2Dataset(Dataset):
-    def __init__(self, dataframe, image_col, text_col, image_path=None, processor=None):
-        self.dataframe = dataframe
-        self.image_col = image_col
-        self.text_col = text_col
-        self.image_path = image_path
-        self.processor = processor
-        self.transform = Compose([Resize((224, 224)), ToTensor()])
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        row = self.dataframe.iloc[idx]
-        text = row[self.text_col]
-        image_file = os.path.join(self.image_path if self.image_path else '', row[self.image_col])
-        image = Image.open(image_file).convert("RGB")
-        image = self.transform(image)
-        return {"text": text, "image": image}
-
-def custom_blip2_collate_fn(batch, processor):
-    texts = [f"Question: {item['text']} Answer:" for item in batch]
-    images = [item["image"] for item in batch]
-    processed = processor(images=images, text=texts, return_tensors="pt", padding=True, truncation=True)
-    return processed
-
 class BLIP2:
     def __init__(self, model_name="Salesforce/blip2-opt-2.7b"):
         self.processor = Blip2Processor.from_pretrained(model_name)
@@ -124,8 +79,8 @@ class BLIP2:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        dataset = BLIP2Dataset(dataframe, image_col_name, text_col_name, image_path, self.processor)
-        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: custom_blip2_collate_fn(x, self.processor), num_workers=num_workers)
+        dataset = VLMDataset(dataframe, image_col_name, text_col_name, image_path)
+        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: blip2_collate_fn(x, self.processor), num_workers=num_workers)
 
         # Initialize list to store qformer outputs
         qformer_outputs_list = []
@@ -133,7 +88,7 @@ class BLIP2:
         # Process batches with a progress bar
         i=0
         for batch in tqdm(dataloader, desc="Processing batches"):
-            batch = {k: v.to(device) for k, v in batch.items()}
+            batch = {k: v.to(device) for k, v in batch.items() if k != 'image_paths'}
             with torch.no_grad():
                 outputs = self.model(**batch)
             qformer_outputs = outputs['qformer_outputs']['pooler_output'].cpu().numpy()
@@ -157,32 +112,6 @@ class BLIP2:
         return concatenated_df
 
 
-class LlavaDataset(Dataset):
-    def __init__(self, dataframe, image_col, text_col, image_path=None, processor=None):
-        self.dataframe = dataframe
-        self.image_col = image_col
-        self.text_col = text_col
-        self.image_path = image_path
-        self.processor = processor
-        self.transform = Compose([Resize((224, 224)), ToTensor()])
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        row = self.dataframe.iloc[idx]
-        text = f"<image>\nUSER: {row[self.text_col]}\nASSISTANT:"
-        image_file = os.path.join(self.image_path if self.image_path else '', row[self.image_col])
-        image = Image.open(image_file).convert("RGB")
-        image = self.transform(image)
-        return {"text": text, "image": image}
-
-def custom_llava_collate_fn(batch, processor):
-    texts = [item["text"] for item in batch]
-    images = [item["image"] for item in batch]
-    processed = processor(text=texts, images=images, return_tensors="pt", padding=True, truncation=True)
-    return processed
-
 class LLAVA:
     def __init__(self, model_name="llava-hf/llava-1.5-7b-hf"):
         self.processor = AutoProcessor.from_pretrained(model_name)
@@ -192,17 +121,26 @@ class LLAVA:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        dataset = LlavaDataset(dataframe, image_col_name, text_col_name, image_path, self.processor)
-        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: custom_llava_collate_fn(x, self.processor), num_workers=num_workers)
+        dataset = VLMDataset(dataframe, image_col_name, text_col_name, image_path)
+        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=lambda x: llava_collate_fn(x, self.processor), num_workers=num_workers)
 
         embeddings_list = []
         i = 0
         for batch in tqdm(dataloader, desc="Processing batches"):
-            batch = {k: v.to(device) for k, v in batch.items()}
+            batch = {k: v.to(device) for k, v in batch.items() if k != 'image_paths'}
             with torch.no_grad():
                 outputs = self.model(**batch, output_hidden_states=True)
+            
             last_hidden_states = outputs['hidden_states'][-1]  # Shape: (batch, seq_len, dim)
-            pooled_outputs = last_hidden_states.mean(dim=1).cpu().numpy()  # Mean pooling
+
+            if 'attention_mask' in batch:
+                input_mask_expanded = batch['attention_mask'].unsqueeze(-1).expand(last_hidden_states.size()).float()
+                sum_embeddings = torch.sum(last_hidden_states * input_mask_expanded, 1)
+                sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+                pooled_outputs = (sum_embeddings / sum_mask).cpu().numpy()
+            else:
+                pooled_outputs = last_hidden_states.mean(dim=1).cpu().numpy()
+
             embeddings_list.append(pooled_outputs)
             
             if i % 100 == 0:
