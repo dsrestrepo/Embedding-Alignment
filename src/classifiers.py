@@ -359,6 +359,10 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
             text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
             optimizer.zero_grad()
             outputs = model(text, image)
+            
+            if output_size == 1 and labels.ndim == 1:
+                labels = labels.unsqueeze(1)
+                
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -371,6 +375,10 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
                  for batch in val_loader:
                      text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
                      outputs = model(text, image)
+                     
+                     if output_size == 1 and labels.ndim == 1:
+                        labels = labels.unsqueeze(1)
+                        
                      loss = criterion(outputs, labels)
                      val_loss += loss.item() * text.size(0)
              
@@ -551,6 +559,10 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
             text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
             optimizer.zero_grad()
             outputs = model(text, image)
+            
+            if output_size == 1 and labels.ndim == 1:
+                labels = labels.unsqueeze(1)
+            
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -563,6 +575,10 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
                  for batch in val_loader:
                      text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
                      outputs = model(text, image)
+                     
+                     if output_size == 1 and labels.ndim == 1:
+                        labels = labels.unsqueeze(1)
+                        
                      loss = criterion(outputs, labels)
                      val_loss += loss.item() * text.size(0)
              

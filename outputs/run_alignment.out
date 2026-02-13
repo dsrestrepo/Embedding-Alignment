@@ -4,25 +4,653 @@ Processing Dataset: brset (Multilabel: False) | Backbone: BioMedCLIP
 ==================================================
 
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/brset/embeddings_biomedclip.csv
-##################################################  Shift -1  ##################################################
+##################################################  Shift 0  ##################################################
 Train Shape: (11710, 1028)
 Val Shape: (1302, 1028)
 Test Shape: (3254, 1028)
 Training Early Fusion Model:
 The number of parameters of the model are: 131585
-Traceback (most recent call last):
-  File "/gpfs/users/restrepoda/Embedding-Alignment/Embedding-Alignment/scripts/run_alignment.py", line 252, in <module>
-    main()
-  File "/gpfs/users/restrepoda/Embedding-Alignment/Embedding-Alignment/scripts/run_alignment.py", line 222, in main
-    accuracy, precision, recall, f1, best = train_early_fusion(
-                                            ^^^^^^^^^^^^^^^^^^^
-  File "/gpfs/users/restrepoda/Embedding-Alignment/Embedding-Alignment/src/classifiers.py", line 309, in train_early_fusion
-    class_indices = np.argmax(train_loader.dataset.labels, axis=1)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/gpfs/users/restrepoda/.conda/envs/base_ml/lib/python3.12/site-packages/numpy/core/fromnumeric.py", line 1229, in argmax
-    return _wrapfunc(a, 'argmax', axis=axis, out=out, **kwds)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/gpfs/users/restrepoda/.conda/envs/base_ml/lib/python3.12/site-packages/numpy/core/fromnumeric.py", line 59, in _wrapfunc
-    return bound(*args, **kwds)
-           ^^^^^^^^^^^^^^^^^^^^
-numpy.exceptions.AxisError: axis 1 is out of bounds for array of dimension 1
+Epoch 1/100 - Validation Loss: 0.6370
+Epoch 2/100 - Validation Loss: 0.6301
+Epoch 3/100 - Validation Loss: 0.6822
+Epoch 4/100 - Validation Loss: 0.6321
+Epoch 5/100 - Validation Loss: 0.6590
+Epoch 6/100 - Validation Loss: 0.6690
+Epoch 7/100 - Validation Loss: 0.6973
+Early stopping triggered after 7 epochs
+Best Accuracy: {'Acc': 0.8432698217578365, 'F1': 0.6590116157220314, 'Auc': 0.915391240559874, 'Epoch': 2, 'Auc_Per_Class': 0.915391240559874}
+Best Macro-F1: {'Acc': 0.8432698217578365, 'F1': 0.6590116157220314, 'Auc': 0.915391240559874, 'Epoch': 2, 'Auc_Per_Class': 0.915391240559874}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6592
+Epoch 2/100 - Validation Loss: 0.6710
+Epoch 3/100 - Validation Loss: 0.6515
+Epoch 4/100 - Validation Loss: 0.6543
+Epoch 5/100 - Validation Loss: 0.6442
+Epoch 6/100 - Validation Loss: 0.6261
+Epoch 7/100 - Validation Loss: 0.6526
+Epoch 8/100 - Validation Loss: 0.6366
+Epoch 9/100 - Validation Loss: 0.6524
+Epoch 10/100 - Validation Loss: 0.6473
+Epoch 11/100 - Validation Loss: 0.6446
+Early stopping triggered after 11 epochs
+Best Accuracy: {'Acc': 0.8761524277811924, 'F1': 0.6916783421152927, 'Auc': 0.9149302337896158, 'Epoch': 6, 'Auc_Per_Class': 0.9149302337896158}
+Best Macro-F1: {'Acc': 0.8761524277811924, 'F1': 0.6916783421152927, 'Auc': 0.9149302337896158, 'Epoch': 6, 'Auc_Per_Class': 0.9149302337896158}
+##################################################  Shift 0.1  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6494
+Epoch 2/100 - Validation Loss: 0.6616
+Epoch 3/100 - Validation Loss: 0.6422
+Epoch 4/100 - Validation Loss: 0.6209
+Epoch 5/100 - Validation Loss: 0.6328
+Epoch 6/100 - Validation Loss: 0.6570
+Epoch 7/100 - Validation Loss: 0.6227
+Epoch 8/100 - Validation Loss: 0.6621
+Epoch 9/100 - Validation Loss: 0.6483
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8740012292563, 'F1': 0.6903455510992276, 'Auc': 0.9140191224362341, 'Epoch': 4, 'Auc_Per_Class': 0.9140191224362341}
+Best Macro-F1: {'Acc': 0.8740012292563, 'F1': 0.6903455510992276, 'Auc': 0.9140191224362341, 'Epoch': 4, 'Auc_Per_Class': 0.9140191224362341}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6450
+Epoch 2/100 - Validation Loss: 0.6991
+Epoch 3/100 - Validation Loss: 0.6572
+Epoch 4/100 - Validation Loss: 0.6602
+Epoch 5/100 - Validation Loss: 0.6455
+Epoch 6/100 - Validation Loss: 0.6233
+Epoch 7/100 - Validation Loss: 0.6592
+Epoch 8/100 - Validation Loss: 0.6272
+Epoch 9/100 - Validation Loss: 0.6222
+Epoch 10/100 - Validation Loss: 0.6595
+Epoch 11/100 - Validation Loss: 0.6563
+Epoch 12/100 - Validation Loss: 0.6546
+Epoch 13/100 - Validation Loss: 0.6595
+Epoch 14/100 - Validation Loss: 0.6861
+Early stopping triggered after 14 epochs
+Best Accuracy: {'Acc': 0.8626306084818685, 'F1': 0.6783523401605477, 'Auc': 0.9145206230444203, 'Epoch': 9, 'Auc_Per_Class': 0.9145206230444203}
+Best Macro-F1: {'Acc': 0.8626306084818685, 'F1': 0.6783523401605477, 'Auc': 0.9145206230444203, 'Epoch': 9, 'Auc_Per_Class': 0.9145206230444203}
+##################################################  Shift 0.2  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6794
+Epoch 2/100 - Validation Loss: 0.6346
+Epoch 3/100 - Validation Loss: 0.6327
+Epoch 4/100 - Validation Loss: 0.6786
+Epoch 5/100 - Validation Loss: 0.6374
+Epoch 6/100 - Validation Loss: 0.6320
+Epoch 7/100 - Validation Loss: 0.6435
+Epoch 8/100 - Validation Loss: 0.6389
+Epoch 9/100 - Validation Loss: 0.6594
+Epoch 10/100 - Validation Loss: 0.6778
+Epoch 11/100 - Validation Loss: 0.6293
+Epoch 12/100 - Validation Loss: 0.6604
+Epoch 13/100 - Validation Loss: 0.6531
+Epoch 14/100 - Validation Loss: 0.6326
+Epoch 15/100 - Validation Loss: 0.6492
+Epoch 16/100 - Validation Loss: 0.6296
+Early stopping triggered after 16 epochs
+Best Accuracy: {'Acc': 0.8552550706822373, 'F1': 0.6731060739366213, 'Auc': 0.9150376982056558, 'Epoch': 11, 'Auc_Per_Class': 0.9150376982056558}
+Best Macro-F1: {'Acc': 0.8552550706822373, 'F1': 0.6731060739366213, 'Auc': 0.9150376982056558, 'Epoch': 11, 'Auc_Per_Class': 0.9150376982056558}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6621
+Epoch 2/100 - Validation Loss: 0.6748
+Epoch 3/100 - Validation Loss: 0.6890
+Epoch 4/100 - Validation Loss: 0.6304
+Epoch 5/100 - Validation Loss: 0.6728
+Epoch 6/100 - Validation Loss: 0.6382
+Epoch 7/100 - Validation Loss: 0.6359
+Epoch 8/100 - Validation Loss: 0.6371
+Epoch 9/100 - Validation Loss: 0.6362
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8334357713583282, 'F1': 0.6505650657790458, 'Auc': 0.9149302337896159, 'Epoch': 4, 'Auc_Per_Class': 0.9149302337896159}
+Best Macro-F1: {'Acc': 0.8334357713583282, 'F1': 0.6505650657790458, 'Auc': 0.9149302337896159, 'Epoch': 4, 'Auc_Per_Class': 0.9149302337896159}
+##################################################  Shift 0.3  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6909
+Epoch 2/100 - Validation Loss: 0.6440
+Epoch 3/100 - Validation Loss: 0.6363
+Epoch 4/100 - Validation Loss: 0.6310
+Epoch 5/100 - Validation Loss: 0.6454
+Epoch 6/100 - Validation Loss: 0.6505
+Epoch 7/100 - Validation Loss: 0.6479
+Epoch 8/100 - Validation Loss: 0.6501
+Epoch 9/100 - Validation Loss: 0.6335
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8647818070067609, 'F1': 0.6809530940258703, 'Auc': 0.9176012696375646, 'Epoch': 4, 'Auc_Per_Class': 0.9176012696375646}
+Best Macro-F1: {'Acc': 0.8647818070067609, 'F1': 0.6809530940258703, 'Auc': 0.9176012696375646, 'Epoch': 4, 'Auc_Per_Class': 0.9176012696375646}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.7312
+Epoch 2/100 - Validation Loss: 0.6609
+Epoch 3/100 - Validation Loss: 0.6598
+Epoch 4/100 - Validation Loss: 0.6728
+Epoch 5/100 - Validation Loss: 0.6349
+Epoch 6/100 - Validation Loss: 0.6726
+Epoch 7/100 - Validation Loss: 0.6258
+Epoch 8/100 - Validation Loss: 0.6463
+Epoch 9/100 - Validation Loss: 0.6309
+Epoch 10/100 - Validation Loss: 0.6468
+Epoch 11/100 - Validation Loss: 0.6511
+Epoch 12/100 - Validation Loss: 0.6715
+Early stopping triggered after 12 epochs
+Best Accuracy: {'Acc': 0.8607867240319607, 'F1': 0.6747432422145214, 'Auc': 0.9149286763343109, 'Epoch': 7, 'Auc_Per_Class': 0.9149286763343109}
+Best Macro-F1: {'Acc': 0.8607867240319607, 'F1': 0.6747432422145214, 'Auc': 0.9149286763343109, 'Epoch': 7, 'Auc_Per_Class': 0.9149286763343109}
+##################################################  Shift 0.4  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.7045
+Epoch 2/100 - Validation Loss: 0.6594
+Epoch 3/100 - Validation Loss: 0.6395
+Epoch 4/100 - Validation Loss: 0.6657
+Epoch 5/100 - Validation Loss: 0.6399
+Epoch 6/100 - Validation Loss: 0.6397
+Epoch 7/100 - Validation Loss: 0.6361
+Epoch 8/100 - Validation Loss: 0.6364
+Epoch 9/100 - Validation Loss: 0.6898
+Epoch 10/100 - Validation Loss: 0.6410
+Epoch 11/100 - Validation Loss: 0.6617
+Epoch 12/100 - Validation Loss: 0.6293
+Epoch 13/100 - Validation Loss: 0.6555
+Epoch 14/100 - Validation Loss: 0.6579
+Epoch 15/100 - Validation Loss: 0.6536
+Epoch 16/100 - Validation Loss: 0.6592
+Epoch 17/100 - Validation Loss: 0.6489
+Early stopping triggered after 17 epochs
+Best Accuracy: {'Acc': 0.8466502765826674, 'F1': 0.663382683263833, 'Auc': 0.9178660370394021, 'Epoch': 12, 'Auc_Per_Class': 0.9178660370394021}
+Best Macro-F1: {'Acc': 0.8466502765826674, 'F1': 0.663382683263833, 'Auc': 0.9178660370394021, 'Epoch': 12, 'Auc_Per_Class': 0.9178660370394021}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6526
+Epoch 2/100 - Validation Loss: 0.6403
+Epoch 3/100 - Validation Loss: 0.6475
+Epoch 4/100 - Validation Loss: 0.6452
+Epoch 5/100 - Validation Loss: 0.6228
+Epoch 6/100 - Validation Loss: 0.6492
+Epoch 7/100 - Validation Loss: 0.6600
+Epoch 8/100 - Validation Loss: 0.6473
+Epoch 9/100 - Validation Loss: 0.6351
+Epoch 10/100 - Validation Loss: 0.6269
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8875230485556238, 'F1': 0.7077971211626052, 'Auc': 0.91515917971944, 'Epoch': 5, 'Auc_Per_Class': 0.91515917971944}
+Best Macro-F1: {'Acc': 0.8875230485556238, 'F1': 0.7077971211626052, 'Auc': 0.91515917971944, 'Epoch': 5, 'Auc_Per_Class': 0.91515917971944}
+##################################################  Shift 0.5  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6545
+Epoch 2/100 - Validation Loss: 0.6626
+Epoch 3/100 - Validation Loss: 0.6450
+Epoch 4/100 - Validation Loss: 0.6639
+Epoch 5/100 - Validation Loss: 0.6417
+Epoch 6/100 - Validation Loss: 0.6480
+Epoch 7/100 - Validation Loss: 0.6494
+Epoch 8/100 - Validation Loss: 0.6367
+Epoch 9/100 - Validation Loss: 0.6608
+Epoch 10/100 - Validation Loss: 0.6234
+Epoch 11/100 - Validation Loss: 0.6420
+Epoch 12/100 - Validation Loss: 0.6547
+Epoch 13/100 - Validation Loss: 0.6663
+Epoch 14/100 - Validation Loss: 0.6617
+Epoch 15/100 - Validation Loss: 0.6422
+Early stopping triggered after 15 epochs
+Best Accuracy: {'Acc': 0.8690842040565457, 'F1': 0.6869593730353155, 'Auc': 0.9186120581304619, 'Epoch': 10, 'Auc_Per_Class': 0.9186120581304619}
+Best Macro-F1: {'Acc': 0.8690842040565457, 'F1': 0.6869593730353155, 'Auc': 0.9186120581304619, 'Epoch': 10, 'Auc_Per_Class': 0.9186120581304619}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.7198
+Epoch 2/100 - Validation Loss: 0.6437
+Epoch 3/100 - Validation Loss: 0.6303
+Epoch 4/100 - Validation Loss: 0.6249
+Epoch 5/100 - Validation Loss: 0.6281
+Epoch 6/100 - Validation Loss: 0.6879
+Epoch 7/100 - Validation Loss: 0.6337
+Epoch 8/100 - Validation Loss: 0.6433
+Epoch 9/100 - Validation Loss: 0.6288
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8429625076828519, 'F1': 0.6600122639752168, 'Auc': 0.9177243086066538, 'Epoch': 4, 'Auc_Per_Class': 0.9177243086066538}
+Best Macro-F1: {'Acc': 0.8429625076828519, 'F1': 0.6600122639752168, 'Auc': 0.9177243086066538, 'Epoch': 4, 'Auc_Per_Class': 0.9177243086066538}
+##################################################  Shift 0.6  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6901
+Epoch 2/100 - Validation Loss: 0.6293
+Epoch 3/100 - Validation Loss: 0.6573
+Epoch 4/100 - Validation Loss: 0.6412
+Epoch 5/100 - Validation Loss: 0.6502
+Epoch 6/100 - Validation Loss: 0.6296
+Epoch 7/100 - Validation Loss: 0.6758
+Early stopping triggered after 7 epochs
+Best Accuracy: {'Acc': 0.8672403196066379, 'F1': 0.6825503501203201, 'Auc': 0.9140113351597092, 'Epoch': 2, 'Auc_Per_Class': 0.9140113351597092}
+Best Macro-F1: {'Acc': 0.8672403196066379, 'F1': 0.6825503501203201, 'Auc': 0.9140113351597092, 'Epoch': 2, 'Auc_Per_Class': 0.9140113351597092}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.7067
+Epoch 2/100 - Validation Loss: 0.6657
+Epoch 3/100 - Validation Loss: 0.6438
+Epoch 4/100 - Validation Loss: 0.6259
+Epoch 5/100 - Validation Loss: 0.6808
+Epoch 6/100 - Validation Loss: 0.6421
+Epoch 7/100 - Validation Loss: 0.6754
+Epoch 8/100 - Validation Loss: 0.6574
+Epoch 9/100 - Validation Loss: 0.6539
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.852181929932391, 'F1': 0.6702555309275408, 'Auc': 0.9157447829140923, 'Epoch': 4, 'Auc_Per_Class': 0.9157447829140923}
+Best Macro-F1: {'Acc': 0.852181929932391, 'F1': 0.6702555309275408, 'Auc': 0.9157447829140923, 'Epoch': 4, 'Auc_Per_Class': 0.9157447829140923}
+##################################################  Shift 0.7  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6348
+Epoch 2/100 - Validation Loss: 0.6416
+Epoch 3/100 - Validation Loss: 0.6265
+Epoch 4/100 - Validation Loss: 0.6451
+Epoch 5/100 - Validation Loss: 0.6732
+Epoch 6/100 - Validation Loss: 0.6393
+Epoch 7/100 - Validation Loss: 0.6739
+Epoch 8/100 - Validation Loss: 0.6356
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.8598647818070068, 'F1': 0.6764459609386447, 'Auc': 0.9193923432382298, 'Epoch': 3, 'Auc_Per_Class': 0.9193923432382298}
+Best Macro-F1: {'Acc': 0.8598647818070068, 'F1': 0.6764459609386447, 'Auc': 0.9193923432382298, 'Epoch': 3, 'Auc_Per_Class': 0.9193923432382298}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6811
+Epoch 2/100 - Validation Loss: 0.6780
+Epoch 3/100 - Validation Loss: 0.6245
+Epoch 4/100 - Validation Loss: 0.6395
+Epoch 5/100 - Validation Loss: 0.6332
+Epoch 6/100 - Validation Loss: 0.6404
+Epoch 7/100 - Validation Loss: 0.6390
+Epoch 8/100 - Validation Loss: 0.6640
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.8875230485556238, 'F1': 0.703328500754779, 'Auc': 0.9148009649993069, 'Epoch': 3, 'Auc_Per_Class': 0.9148009649993069}
+Best Macro-F1: {'Acc': 0.8875230485556238, 'F1': 0.703328500754779, 'Auc': 0.9148009649993069, 'Epoch': 3, 'Auc_Per_Class': 0.9148009649993069}
+##################################################  Shift 0.8  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6893
+Epoch 2/100 - Validation Loss: 0.6491
+Epoch 3/100 - Validation Loss: 0.6334
+Epoch 4/100 - Validation Loss: 0.6628
+Epoch 5/100 - Validation Loss: 0.6326
+Epoch 6/100 - Validation Loss: 0.6492
+Epoch 7/100 - Validation Loss: 0.6468
+Epoch 8/100 - Validation Loss: 0.6507
+Epoch 9/100 - Validation Loss: 0.6400
+Epoch 10/100 - Validation Loss: 0.6520
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8325138291333744, 'F1': 0.6483027932028039, 'Auc': 0.9118480297411665, 'Epoch': 5, 'Auc_Per_Class': 0.9118480297411665}
+Best Macro-F1: {'Acc': 0.8325138291333744, 'F1': 0.6483027932028039, 'Auc': 0.9118480297411665, 'Epoch': 5, 'Auc_Per_Class': 0.9118480297411665}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6935
+Epoch 2/100 - Validation Loss: 0.6812
+Epoch 3/100 - Validation Loss: 0.6886
+Epoch 4/100 - Validation Loss: 0.6311
+Epoch 5/100 - Validation Loss: 0.6577
+Epoch 6/100 - Validation Loss: 0.6634
+Epoch 7/100 - Validation Loss: 0.6442
+Epoch 8/100 - Validation Loss: 0.6643
+Epoch 9/100 - Validation Loss: 0.6513
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8426551936078672, 'F1': 0.6583458015066803, 'Auc': 0.914336843318439, 'Epoch': 4, 'Auc_Per_Class': 0.914336843318439}
+Best Macro-F1: {'Acc': 0.8426551936078672, 'F1': 0.6583458015066803, 'Auc': 0.914336843318439, 'Epoch': 4, 'Auc_Per_Class': 0.914336843318439}
+##################################################  Shift 0.9  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.7539
+Epoch 2/100 - Validation Loss: 0.6416
+Epoch 3/100 - Validation Loss: 0.6459
+Epoch 4/100 - Validation Loss: 0.6262
+Epoch 5/100 - Validation Loss: 0.6281
+Epoch 6/100 - Validation Loss: 0.6588
+Epoch 7/100 - Validation Loss: 0.6551
+Epoch 8/100 - Validation Loss: 0.6439
+Epoch 9/100 - Validation Loss: 0.6401
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.851259987707437, 'F1': 0.6658130938689595, 'Auc': 0.9156092843025638, 'Epoch': 4, 'Auc_Per_Class': 0.9156092843025638}
+Best Macro-F1: {'Acc': 0.851259987707437, 'F1': 0.6658130938689595, 'Auc': 0.9156092843025638, 'Epoch': 4, 'Auc_Per_Class': 0.9156092843025638}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6496
+Epoch 2/100 - Validation Loss: 0.6343
+Epoch 3/100 - Validation Loss: 0.6415
+Epoch 4/100 - Validation Loss: 0.6833
+Epoch 5/100 - Validation Loss: 0.6333
+Epoch 6/100 - Validation Loss: 0.6373
+Epoch 7/100 - Validation Loss: 0.6562
+Epoch 8/100 - Validation Loss: 0.6459
+Epoch 9/100 - Validation Loss: 0.6522
+Epoch 10/100 - Validation Loss: 0.6447
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8635525507068224, 'F1': 0.6794629228639381, 'Auc': 0.9159254477294638, 'Epoch': 5, 'Auc_Per_Class': 0.9159254477294638}
+Best Macro-F1: {'Acc': 0.8635525507068224, 'F1': 0.6794629228639381, 'Auc': 0.9159254477294638, 'Epoch': 5, 'Auc_Per_Class': 0.9159254477294638}
+##################################################  Shift 1  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6564
+Epoch 2/100 - Validation Loss: 0.6716
+Epoch 3/100 - Validation Loss: 0.6141
+Epoch 4/100 - Validation Loss: 0.6213
+Epoch 5/100 - Validation Loss: 0.6289
+Epoch 6/100 - Validation Loss: 0.6391
+Epoch 7/100 - Validation Loss: 0.6297
+Epoch 8/100 - Validation Loss: 0.6490
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.8583282114320836, 'F1': 0.6718457106468675, 'Auc': 0.9157478978247022, 'Epoch': 3, 'Auc_Per_Class': 0.9157478978247022}
+Best Macro-F1: {'Acc': 0.8583282114320836, 'F1': 0.6718457106468675, 'Auc': 0.9157478978247022, 'Epoch': 3, 'Auc_Per_Class': 0.9157478978247022}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6675
+Epoch 2/100 - Validation Loss: 0.6498
+Epoch 3/100 - Validation Loss: 0.6316
+Epoch 4/100 - Validation Loss: 0.6466
+Epoch 5/100 - Validation Loss: 0.6489
+Epoch 6/100 - Validation Loss: 0.6602
+Epoch 7/100 - Validation Loss: 0.6479
+Epoch 8/100 - Validation Loss: 0.6468
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.866318377381684, 'F1': 0.6842309558466764, 'Auc': 0.9168365590828457, 'Epoch': 3, 'Auc_Per_Class': 0.9168365590828457}
+Best Macro-F1: {'Acc': 0.866318377381684, 'F1': 0.6842309558466764, 'Auc': 0.9168365590828457, 'Epoch': 3, 'Auc_Per_Class': 0.9168365590828457}
+Saved metrics to Images/Alignment/brset/BioMedCLIP/metrics.json
+
+==================================================
+Processing Dataset: brset (Multilabel: False) | Backbone: CLIP
+==================================================
+
+Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/brset/embeddings_clip.csv
+##################################################  Shift 0  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6311
+Epoch 2/100 - Validation Loss: 0.5637
+Epoch 3/100 - Validation Loss: 0.5376
+Epoch 4/100 - Validation Loss: 0.5766
+Epoch 5/100 - Validation Loss: 0.5646
+Epoch 6/100 - Validation Loss: 0.5851
+Epoch 7/100 - Validation Loss: 0.5812
+Epoch 8/100 - Validation Loss: 0.5377
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.8730792870313461, 'F1': 0.7066430334099886, 'Auc': 0.9613533040635567, 'Epoch': 3, 'Auc_Per_Class': 0.9613533040635567}
+Best Macro-F1: {'Acc': 0.8730792870313461, 'F1': 0.7066430334099886, 'Auc': 0.9613533040635567, 'Epoch': 3, 'Auc_Per_Class': 0.9613533040635567}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.5931
+Epoch 2/100 - Validation Loss: 0.5780
+Epoch 3/100 - Validation Loss: 0.5635
+Epoch 4/100 - Validation Loss: 0.5818
+Epoch 5/100 - Validation Loss: 0.5365
+Epoch 6/100 - Validation Loss: 0.5695
+Epoch 7/100 - Validation Loss: 0.5531
+Epoch 8/100 - Validation Loss: 0.5924
+Epoch 9/100 - Validation Loss: 0.5622
+Epoch 10/100 - Validation Loss: 0.5947
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8816840811309158, 'F1': 0.7174044219071971, 'Auc': 0.9620292396658946, 'Epoch': 5, 'Auc_Per_Class': 0.9620292396658946}
+Best Macro-F1: {'Acc': 0.8816840811309158, 'F1': 0.7174044219071971, 'Auc': 0.9620292396658946, 'Epoch': 5, 'Auc_Per_Class': 0.9620292396658946}
+##################################################  Shift 0.1  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6678
+Epoch 2/100 - Validation Loss: 0.5718
+Epoch 3/100 - Validation Loss: 0.5851
+Epoch 4/100 - Validation Loss: 0.5409
+Epoch 5/100 - Validation Loss: 0.5858
+Epoch 6/100 - Validation Loss: 0.5981
+Epoch 7/100 - Validation Loss: 0.5493
+Epoch 8/100 - Validation Loss: 0.6149
+Epoch 9/100 - Validation Loss: 0.5740
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8712354025814383, 'F1': 0.7036485914012781, 'Auc': 0.9611773116140999, 'Epoch': 4, 'Auc_Per_Class': 0.9611773116140999}
+Best Macro-F1: {'Acc': 0.8712354025814383, 'F1': 0.7036485914012781, 'Auc': 0.9611773116140999, 'Epoch': 4, 'Auc_Per_Class': 0.9611773116140999}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6666
+Epoch 2/100 - Validation Loss: 0.5892
+Epoch 3/100 - Validation Loss: 0.5374
+Epoch 4/100 - Validation Loss: 0.5948
+Epoch 5/100 - Validation Loss: 0.6337
+Epoch 6/100 - Validation Loss: 0.5616
+Epoch 7/100 - Validation Loss: 0.5793
+Epoch 8/100 - Validation Loss: 0.5712
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.9096496619545175, 'F1': 0.7567019894631797, 'Auc': 0.964307796777002, 'Epoch': 3, 'Auc_Per_Class': 0.964307796777002}
+Best Macro-F1: {'Acc': 0.9096496619545175, 'F1': 0.7567019894631797, 'Auc': 0.964307796777002, 'Epoch': 3, 'Auc_Per_Class': 0.964307796777002}
+##################################################  Shift 0.2  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.6137
+Epoch 2/100 - Validation Loss: 0.5584
+Epoch 3/100 - Validation Loss: 0.7727
+Epoch 4/100 - Validation Loss: 0.5139
+Epoch 5/100 - Validation Loss: 0.5837
+Epoch 6/100 - Validation Loss: 0.5581
+Epoch 7/100 - Validation Loss: 0.5497
+Epoch 8/100 - Validation Loss: 0.5600
+Epoch 9/100 - Validation Loss: 0.5306
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8945912722802705, 'F1': 0.7350698131045879, 'Auc': 0.9638950711211965, 'Epoch': 4, 'Auc_Per_Class': 0.9638950711211965}
+Best Macro-F1: {'Acc': 0.8945912722802705, 'F1': 0.7350698131045879, 'Auc': 0.9638950711211965, 'Epoch': 4, 'Auc_Per_Class': 0.9638950711211965}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.5649
+Epoch 2/100 - Validation Loss: 0.5822
+Epoch 3/100 - Validation Loss: 0.5523
+Epoch 4/100 - Validation Loss: 0.5539
+Epoch 5/100 - Validation Loss: 0.5035
+Epoch 6/100 - Validation Loss: 0.5378
+Epoch 7/100 - Validation Loss: 0.5313
+Epoch 8/100 - Validation Loss: 0.5297
+Epoch 9/100 - Validation Loss: 0.5654
+Epoch 10/100 - Validation Loss: 0.5658
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8746158574062692, 'F1': 0.7080043072505384, 'Auc': 0.9635664480518571, 'Epoch': 5, 'Auc_Per_Class': 0.9635664480518571}
+Best Macro-F1: {'Acc': 0.8746158574062692, 'F1': 0.7080043072505384, 'Auc': 0.9635664480518571, 'Epoch': 5, 'Auc_Per_Class': 0.9635664480518571}
+##################################################  Shift 0.3  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.7227
+Epoch 2/100 - Validation Loss: 0.6299
+Epoch 3/100 - Validation Loss: 0.6644
+Epoch 4/100 - Validation Loss: 0.5613
+Epoch 5/100 - Validation Loss: 0.5898
+Epoch 6/100 - Validation Loss: 0.5747
+Epoch 7/100 - Validation Loss: 0.5208
+Epoch 8/100 - Validation Loss: 0.5281
+Epoch 9/100 - Validation Loss: 0.5093
+Epoch 10/100 - Validation Loss: 0.5434
+Epoch 11/100 - Validation Loss: 0.5513
+Epoch 12/100 - Validation Loss: 0.6565
+Epoch 13/100 - Validation Loss: 0.5739
+Epoch 14/100 - Validation Loss: 0.5772
+Early stopping triggered after 14 epochs
+Best Accuracy: {'Acc': 0.8985863552550707, 'F1': 0.7441904342630734, 'Auc': 0.9674990226967961, 'Epoch': 9, 'Auc_Per_Class': 0.9674990226967961}
+Best Macro-F1: {'Acc': 0.8985863552550707, 'F1': 0.7441904342630734, 'Auc': 0.9674990226967961, 'Epoch': 9, 'Auc_Per_Class': 0.9674990226967961}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.5711
+Epoch 2/100 - Validation Loss: 0.5546
+Epoch 3/100 - Validation Loss: 0.6055
+Epoch 4/100 - Validation Loss: 0.5736
+Epoch 5/100 - Validation Loss: 0.5461
+Epoch 6/100 - Validation Loss: 0.5459
+Epoch 7/100 - Validation Loss: 0.6126
+Epoch 8/100 - Validation Loss: 0.5736
+Epoch 9/100 - Validation Loss: 0.5674
+Epoch 10/100 - Validation Loss: 0.5448
+Epoch 11/100 - Validation Loss: 0.5659
+Epoch 12/100 - Validation Loss: 0.5696
+Epoch 13/100 - Validation Loss: 0.5826
+Epoch 14/100 - Validation Loss: 0.6132
+Epoch 15/100 - Validation Loss: 0.7019
+Early stopping triggered after 15 epochs
+Best Accuracy: {'Acc': 0.9194837123540258, 'F1': 0.7723539809776079, 'Auc': 0.9649401236308021, 'Epoch': 10, 'Auc_Per_Class': 0.9649401236308021}
+Best Macro-F1: {'Acc': 0.9194837123540258, 'F1': 0.7723539809776079, 'Auc': 0.9649401236308021, 'Epoch': 10, 'Auc_Per_Class': 0.9649401236308021}
+##################################################  Shift 0.4  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.5971
+Epoch 2/100 - Validation Loss: 0.5591
+Epoch 3/100 - Validation Loss: 0.5535
+Epoch 4/100 - Validation Loss: 0.5638
+Epoch 5/100 - Validation Loss: 0.5247
+Epoch 6/100 - Validation Loss: 0.5080
+Epoch 7/100 - Validation Loss: 0.5481
+Epoch 8/100 - Validation Loss: 0.5566
+Epoch 9/100 - Validation Loss: 0.5838
+Epoch 10/100 - Validation Loss: 0.5666
+Epoch 11/100 - Validation Loss: 0.6128
+Early stopping triggered after 11 epochs
+Best Accuracy: {'Acc': 0.9148740012292563, 'F1': 0.7686421298852371, 'Auc': 0.9650102091195237, 'Epoch': 6, 'Auc_Per_Class': 0.9650102091195237}
+Best Macro-F1: {'Acc': 0.9148740012292563, 'F1': 0.7686421298852371, 'Auc': 0.9650102091195237, 'Epoch': 6, 'Auc_Per_Class': 0.9650102091195237}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6281
+Epoch 2/100 - Validation Loss: 0.5823
+Epoch 3/100 - Validation Loss: 0.5398
+Epoch 4/100 - Validation Loss: 0.5691
+Epoch 5/100 - Validation Loss: 0.5528
+Epoch 6/100 - Validation Loss: 0.5623
+Epoch 7/100 - Validation Loss: 0.5520
+Epoch 8/100 - Validation Loss: 0.5998
+Early stopping triggered after 8 epochs
+Best Accuracy: {'Acc': 0.8927473878303627, 'F1': 0.7310799204449363, 'Auc': 0.9626755836174391, 'Epoch': 3, 'Auc_Per_Class': 0.9626755836174391}
+Best Macro-F1: {'Acc': 0.8927473878303627, 'F1': 0.7310799204449363, 'Auc': 0.9626755836174391, 'Epoch': 3, 'Auc_Per_Class': 0.9626755836174391}
+##################################################  Shift 0.5  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.7270
+Epoch 2/100 - Validation Loss: 0.5851
+Epoch 3/100 - Validation Loss: 0.5649
+Epoch 4/100 - Validation Loss: 0.5459
+Epoch 5/100 - Validation Loss: 0.5506
+Epoch 6/100 - Validation Loss: 0.5206
+Epoch 7/100 - Validation Loss: 0.5398
+Epoch 8/100 - Validation Loss: 0.5669
+Epoch 9/100 - Validation Loss: 0.5757
+Epoch 10/100 - Validation Loss: 0.8476
+Epoch 11/100 - Validation Loss: 0.5632
+Early stopping triggered after 11 epochs
+Best Accuracy: {'Acc': 0.8905961893054702, 'F1': 0.7298713557639931, 'Auc': 0.9631568373066615, 'Epoch': 6, 'Auc_Per_Class': 0.9631568373066615}
+Best Macro-F1: {'Acc': 0.8905961893054702, 'F1': 0.7298713557639931, 'Auc': 0.9631568373066615, 'Epoch': 6, 'Auc_Per_Class': 0.9631568373066615}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.7811
+Epoch 2/100 - Validation Loss: 0.5477
+Epoch 3/100 - Validation Loss: 0.5248
+Epoch 4/100 - Validation Loss: 0.5215
+Epoch 5/100 - Validation Loss: 0.5521
+Epoch 6/100 - Validation Loss: 0.6412
+Epoch 7/100 - Validation Loss: 0.5630
+Epoch 8/100 - Validation Loss: 0.5652
+Epoch 9/100 - Validation Loss: 0.5643
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8844499078057775, 'F1': 0.721827985445524, 'Auc': 0.9656877021771668, 'Epoch': 4, 'Auc_Per_Class': 0.9656877021771668}
+Best Macro-F1: {'Acc': 0.8844499078057775, 'F1': 0.721827985445524, 'Auc': 0.9656877021771668, 'Epoch': 4, 'Auc_Per_Class': 0.9656877021771668}
+##################################################  Shift 0.6  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.5979
+Epoch 2/100 - Validation Loss: 0.5676
+Epoch 3/100 - Validation Loss: 0.6562
+Epoch 4/100 - Validation Loss: 0.5279
+Epoch 5/100 - Validation Loss: 0.5882
+Epoch 6/100 - Validation Loss: 0.5677
+Epoch 7/100 - Validation Loss: 0.6126
+Epoch 8/100 - Validation Loss: 0.5516
+Epoch 9/100 - Validation Loss: 0.5322
+Early stopping triggered after 9 epochs
+Best Accuracy: {'Acc': 0.8961278426551936, 'F1': 0.7386183885318833, 'Auc': 0.9616352034737484, 'Epoch': 4, 'Auc_Per_Class': 0.9616352034737484}
+Best Macro-F1: {'Acc': 0.8961278426551936, 'F1': 0.7386183885318833, 'Auc': 0.9616352034737484, 'Epoch': 4, 'Auc_Per_Class': 0.9616352034737484}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6348
+Epoch 2/100 - Validation Loss: 0.6368
+Epoch 3/100 - Validation Loss: 0.5400
+Epoch 4/100 - Validation Loss: 0.5476
+Epoch 5/100 - Validation Loss: 0.5855
+Epoch 6/100 - Validation Loss: 0.5609
+Epoch 7/100 - Validation Loss: 0.5524
+Epoch 8/100 - Validation Loss: 0.5310
+Epoch 9/100 - Validation Loss: 0.5307
+Epoch 10/100 - Validation Loss: 0.5753
+Epoch 11/100 - Validation Loss: 0.5504
+Epoch 12/100 - Validation Loss: 0.5669
+Epoch 13/100 - Validation Loss: 0.5582
+Epoch 14/100 - Validation Loss: 0.5694
+Early stopping triggered after 14 epochs
+Best Accuracy: {'Acc': 0.9250153657037492, 'F1': 0.778664139161463, 'Auc': 0.9627690309357346, 'Epoch': 9, 'Auc_Per_Class': 0.9627690309357346}
+Best Macro-F1: {'Acc': 0.9250153657037492, 'F1': 0.778664139161463, 'Auc': 0.9627690309357346, 'Epoch': 9, 'Auc_Per_Class': 0.9627690309357346}
+##################################################  Shift 0.7  ##################################################
+Train Shape: (11710, 1028)
+Val Shape: (1302, 1028)
+Test Shape: (3254, 1028)
+Training Early Fusion Model:
+The number of parameters of the model are: 131585
+Epoch 1/100 - Validation Loss: 0.8260
+Epoch 2/100 - Validation Loss: 0.5795
+Epoch 3/100 - Validation Loss: 0.6319
+Epoch 4/100 - Validation Loss: 0.5468
+Epoch 5/100 - Validation Loss: 0.5284
+Epoch 6/100 - Validation Loss: 0.5741
+Epoch 7/100 - Validation Loss: 0.5585
+Epoch 8/100 - Validation Loss: 0.5953
+Epoch 9/100 - Validation Loss: 0.5590
+Epoch 10/100 - Validation Loss: 0.5542
+Early stopping triggered after 10 epochs
+Best Accuracy: {'Acc': 0.8976644130301168, 'F1': 0.7415535427859302, 'Auc': 0.9660910831011427, 'Epoch': 5, 'Auc_Per_Class': 0.9660910831011427}
+Best Macro-F1: {'Acc': 0.8976644130301168, 'F1': 0.7415535427859302, 'Auc': 0.9660910831011427, 'Epoch': 5, 'Auc_Per_Class': 0.9660910831011427}
+Training Late Fusion Model:
+The number of parameters of the model are: 66049
+Epoch 1/100 - Validation Loss: 0.6225
