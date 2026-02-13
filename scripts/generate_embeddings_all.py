@@ -21,29 +21,24 @@ NPROC_PER_NODE = 2
 DATASET_CONFIGS = {
     'daquar': {'path': 'daquar', 'image_col': 'image_id', 'text_col': 'question', 'image_dir': 'images'},
     'coco-qa': {'path': 'coco-qa', 'image_col': 'image_id', 'text_col': 'questions', 'image_dir': 'images'},
-    'fakeddit': {'path': 'fakeddit', 'image_col': 'id', 'text_col': 'title', 'image_dir': 'images'},
+    'fakeddit': {'path': 'fakeddit', 'image_col': 'id', 'text_col': 'text', 'image_dir': 'images'},
     'Recipes5k': {'path': 'Recipes5k', 'image_col': 'image', 'text_col': 'ingredients', 'image_dir': 'images'},
     'brset': {'path': 'BRSET/brset', 'image_col': 'image_id', 'text_col': 'text', 'image_dir': 'images'},
     'ham10000': {'path': 'HAM10000', 'image_col': 'image_id', 'text_col': 'text', 'image_dir': 'images'},
     'mimic': {'path': 'MIMIC/mimic', 'image_col': 'path_preproc', 'text_col': 'text', 'image_dir': '.'},
     'mbrset': {'path': 'mBRSET/mbrset', 'image_col': 'file', 'text_col': 'text', 'image_dir': 'images'},
-    #'satellitedata': {'path': 'satellitedata', 'image_col': 'image_id', 'text_col': 'text', 'image_dir': 'images'},
-    
 }
 
 # List of datasets to process (add/remove as needed)
 DATASETS_TO_RUN = [
-    #'Recipes5k',    # ✅
-    #'daquar',       # ✅
-    #'coco-qa',      # ✅
-    #'brset',        # ✅
-    #'ham10000',     # ✅
-    #'mimic',        # ✅
-    #'mbrset',       # ✅ 
-
-    'fakeddit',
-    #'satellitedata',
-    
+    'Recipes5k',    # ✅
+    'daquar',       # ✅
+    'coco-qa',      # ✅
+    'brset',        # ✅
+    'ham10000',     # ✅
+    'mimic',        # ✅
+    'mbrset',       # ✅ 
+    'fakeddit',     # ✅
 ]
 
 # List of models to use

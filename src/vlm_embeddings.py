@@ -47,9 +47,15 @@ def get_unimed_embeddings(dataframe, batch_size, image_col_name, text_col_name, 
     img_embeddings_list = []
     text_embeddings_list = []
     image_paths_list = []
+    original_texts_list = []
 
     for batch in tqdm(dataloader, desc="Processing batches"):
         image_paths_list.extend(batch['image_paths'])
+        if 'original_text' in batch:
+            original_texts_list.extend(batch['original_text'])
+        else:
+            original_texts_list.extend(batch['text'])
+            
         # batch['image'] is the tensor of images
         images = batch['image'].to(device)
         texts = batch['text']
@@ -84,13 +90,16 @@ def get_unimed_embeddings(dataframe, batch_size, image_col_name, text_col_name, 
     all_img_embeddings = [None] * dist.get_world_size()
     all_text_embeddings = [None] * dist.get_world_size()
     all_image_paths = [None] * dist.get_world_size()
+    all_original_texts = [None] * dist.get_world_size()
     
     dist.all_gather_object(all_img_embeddings, img_embeddings_list)
     dist.all_gather_object(all_text_embeddings, text_embeddings_list)
     dist.all_gather_object(all_image_paths, image_paths_list)
+    dist.all_gather_object(all_original_texts, original_texts_list)
 
     if dist.get_rank() == 0:
         all_image_paths = [item for sublist in all_image_paths for item in sublist]
+        all_original_texts = [item for sublist in all_original_texts for item in sublist]
         
         all_img_embeddings = [batch for sublist in all_img_embeddings for batch in sublist]
         img_embeddings = np.concatenate(all_img_embeddings, axis=0)
@@ -104,8 +113,9 @@ def get_unimed_embeddings(dataframe, batch_size, image_col_name, text_col_name, 
         # Combine
         embeddings_df = pd.concat([img_emb_df, text_emb_df], axis=1)
         embeddings_df[image_col_name] = all_image_paths
+        embeddings_df[text_col_name] = all_original_texts
         
-        concatenated_df = pd.merge(dataframe, embeddings_df, on=image_col_name, how='left')
+        concatenated_df = pd.merge(dataframe, embeddings_df, on=[image_col_name, text_col_name], how='left')
         output_path = os.path.join(output_dir, output_file)
         concatenated_df.drop_duplicates().to_csv(output_path, index=False)
 
@@ -125,10 +135,13 @@ def get_clip_embeddings(dataframe, batch_size, image_col_name, text_col_name, im
     img_embeddings_list = []
     text_embeddings_list = []
     image_paths_list = []
+    original_texts_list = []
 
     for batch in tqdm(dataloader, desc="Processing batches"):
-        batch_inputs = {k: v.to(device) for k, v in batch.items() if k != 'image_paths'}
+        batch_inputs = {k: v.to(device) for k, v in batch.items() if k != 'image_paths' and k != 'original_text'}
         image_paths_list.extend(batch['image_paths'])
+        if 'original_text' in batch:
+            original_texts_list.extend(batch['original_text'])
         
         with torch.no_grad():
             if hasattr(model, 'module'):
@@ -176,13 +189,16 @@ def get_clip_embeddings(dataframe, batch_size, image_col_name, text_col_name, im
     all_img_embeddings = [None] * dist.get_world_size()
     all_text_embeddings = [None] * dist.get_world_size()
     all_image_paths = [None] * dist.get_world_size()
+    all_original_texts = [None] * dist.get_world_size()
     
     dist.all_gather_object(all_img_embeddings, img_embeddings_list)
     dist.all_gather_object(all_text_embeddings, text_embeddings_list)
     dist.all_gather_object(all_image_paths, image_paths_list)
+    dist.all_gather_object(all_original_texts, original_texts_list)
 
     if dist.get_rank() == 0:
         all_image_paths = [item for sublist in all_image_paths for item in sublist]
+        all_original_texts = [item for sublist in all_original_texts for item in sublist]
         
         all_img_embeddings = [batch for sublist in all_img_embeddings for batch in sublist]
         img_embeddings = np.concatenate(all_img_embeddings, axis=0)
@@ -196,8 +212,9 @@ def get_clip_embeddings(dataframe, batch_size, image_col_name, text_col_name, im
         # Combine
         embeddings_df = pd.concat([img_emb_df, text_emb_df], axis=1)
         embeddings_df[image_col_name] = all_image_paths
+        embeddings_df[text_col_name] = all_original_texts
         
-        concatenated_df = pd.merge(dataframe, embeddings_df, on=image_col_name, how='left')
+        concatenated_df = pd.merge(dataframe, embeddings_df, on=[image_col_name, text_col_name], how='left')
         output_path = os.path.join(output_dir, output_file)
         concatenated_df.drop_duplicates().to_csv(output_path, index=False)
 
@@ -219,11 +236,15 @@ def get_blip2_embeddings(dataframe, batch_size, image_col_name, text_col_name, i
         
     embeddings_list = []
     image_paths_list = []
+    original_texts_list = []
 
     for batch in tqdm(dataloader, desc="Processing batches"):
         #batch_inputs = {k: v.to(device) for k, v in batch.items() if k != 'image_paths'}
-        batch_inputs = {k: v for k, v in batch.items() if k != 'image_paths'}
+        batch_inputs = {k: v for k, v in batch.items() if k != 'image_paths' and k != 'original_text'}
         image_paths_list.extend(batch['image_paths'])
+        if 'original_text' in batch:
+            original_texts_list.extend(batch['original_text'])
+
         with torch.no_grad():
             outputs = model(**batch_inputs)
         
@@ -241,22 +262,27 @@ def get_blip2_embeddings(dataframe, batch_size, image_col_name, text_col_name, i
     # Gather all embeddings and image paths from all processes
     all_embeddings = [None] * dist.get_world_size()
     all_image_paths = [None] * dist.get_world_size()
+    all_original_texts = [None] * dist.get_world_size()
+
     dist.all_gather_object(all_embeddings, embeddings_list)
     dist.all_gather_object(all_image_paths, image_paths_list)
+    dist.all_gather_object(all_original_texts, original_texts_list)
 
     # Concatenate embeddings and image paths from all processes
     if dist.get_rank() == 0:  # Only the main process will save the output
         
         all_image_paths = [item for sublist in all_image_paths for item in sublist]
+        all_original_texts = [item for sublist in all_original_texts for item in sublist]
         all_embeddings = [batch for sublist in all_embeddings for batch in sublist]
         
         embeddings = np.concatenate(all_embeddings, axis=0)
 
         embeddings_df = pd.DataFrame(embeddings, columns=[f'embedding_{i}' for i in range(embeddings.shape[1])])
         embeddings_df[image_col_name] = all_image_paths
+        embeddings_df[text_col_name] = all_original_texts
 
         # Merge the original dataframe with the embeddings dataframe on the image path
-        concatenated_df = pd.merge(dataframe, embeddings_df, on=image_col_name, how='left')
+        concatenated_df = pd.merge(dataframe, embeddings_df, on=[image_col_name, text_col_name], how='left')
 
         # Save the final DataFrame to a CSV file
         output_path = os.path.join(output_dir, output_file)
@@ -278,11 +304,14 @@ def get_llava_embeddings(dataframe, batch_size, image_col_name, text_col_name, i
 
     embeddings_list = []
     image_paths_list = []
+    original_texts_list = []
 
     for batch in tqdm(dataloader, desc="Processing batches"):
         #batch_inputs = {k: v.to(device) for k, v in batch.items() if k != 'image_paths'}
-        batch_inputs = {k: v for k, v in batch.items() if k != 'image_paths'}
+        batch_inputs = {k: v for k, v in batch.items() if k != 'image_paths' and k != 'original_text'}
         image_paths_list.extend(batch['image_paths'])
+        if 'original_text' in batch:
+            original_texts_list.extend(batch['original_text'])
         
         with torch.no_grad():
             outputs = model(**batch_inputs, output_hidden_states=True)
@@ -304,13 +333,16 @@ def get_llava_embeddings(dataframe, batch_size, image_col_name, text_col_name, i
     # Gather all embeddings and image paths from all processes
     all_embeddings = [None] * dist.get_world_size()
     all_image_paths = [None] * dist.get_world_size()
+    all_original_texts = [None] * dist.get_world_size()
     dist.all_gather_object(all_embeddings, embeddings_list)
     dist.all_gather_object(all_image_paths, image_paths_list)
+    dist.all_gather_object(all_original_texts, original_texts_list)
 
     # Concatenate embeddings and image paths from all processes
     if dist.get_rank() == 0:  # Only the main process will save the output
         
         all_image_paths = [item for sublist in all_image_paths for item in sublist]
+        all_original_texts = [item for sublist in all_original_texts for item in sublist]
         
         all_embeddings = [batch for sublist in all_embeddings for batch in sublist]
 
@@ -322,9 +354,10 @@ def get_llava_embeddings(dataframe, batch_size, image_col_name, text_col_name, i
 
         embeddings_df = pd.DataFrame(embeddings, columns=[f'embedding_{i}' for i in range(embeddings.shape[1])])
         embeddings_df[image_col_name] = all_image_paths
+        embeddings_df[text_col_name] = all_original_texts
 
         # Merge the original dataframe with the embeddings dataframe on the image path
-        concatenated_df = pd.merge(dataframe, embeddings_df, on=image_col_name, how='left')
+        concatenated_df = pd.merge(dataframe, embeddings_df, on=[image_col_name, text_col_name], how='left')
 
         # Save the final DataFrame to a CSV file
         output_path = os.path.join(output_dir, output_file)

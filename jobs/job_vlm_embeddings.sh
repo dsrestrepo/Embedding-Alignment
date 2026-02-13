@@ -2,7 +2,7 @@
 #SBATCH --job-name=vlm_embeddings
 #SBATCH --output=outputs/vlm_embeddings.out
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH --gres=gpu:2
 #SBATCH --partition=gpua100
 #SBATCH --mem=120000

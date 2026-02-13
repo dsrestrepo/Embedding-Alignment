@@ -305,8 +305,11 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     
     if set_weights:
         if not multilabel:
-            # Assuming train_loader.dataset.labels is a one-hot representation
-            class_indices = np.argmax(train_loader.dataset.labels, axis=1)
+            # Check if labels are 1D (binary/sparse) or 2D (one-hot)
+            if train_loader.dataset.labels.ndim == 1:
+                class_indices = train_loader.dataset.labels.astype(int)
+            else:
+                class_indices = np.argmax(train_loader.dataset.labels, axis=1)
 
             # Compute class weights using class indices
             class_weights = compute_class_weight('balanced', classes=np.unique(class_indices), y=class_indices)
@@ -328,7 +331,12 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     if multilabel:
         criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     elif(output_size == 1):
-        criterion = nn.BCEWithLogitsLoss(weight=class_weights)
+        # For binary classification with single output, we use pos_weight
+        if class_weights is not None and len(class_weights) == 2:
+            pos_weight = class_weights[1] / class_weights[0]
+            criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        else:
+            criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     else:
         criterion = nn.CrossEntropyLoss(weight=class_weights)
     
@@ -483,8 +491,11 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     if set_weights:
 
         if not multilabel:
-            # Assuming train_loader.dataset.labels is a one-hot representation
-            class_indices = np.argmax(train_loader.dataset.labels, axis=1)
+            # Check if labels are 1D (binary/sparse) or 2D (one-hot)
+            if train_loader.dataset.labels.ndim == 1:
+                class_indices = train_loader.dataset.labels.astype(int)
+            else:
+                class_indices = np.argmax(train_loader.dataset.labels, axis=1)
 
             # Compute class weights using class indices
             class_weights = compute_class_weight('balanced', classes=np.unique(class_indices), y=class_indices)
@@ -506,7 +517,12 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     if multilabel:
         criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     elif(output_size == 1):
-        criterion = nn.BCEWithLogitsLoss(weight=class_weights)
+        # For binary classification with single output, we use pos_weight
+        if class_weights is not None and len(class_weights) == 2:
+            pos_weight = class_weights[1] / class_weights[0]
+            criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+        else:
+            criterion = nn.BCEWithLogitsLoss(weight=class_weights)
     else:
         criterion = nn.CrossEntropyLoss(weight=class_weights)
         

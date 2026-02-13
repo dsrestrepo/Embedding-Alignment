@@ -34,42 +34,49 @@ def blip2_collate_fn(batch, processor):
     texts = [f"Question: {item['text']} Answer:" for item in batch]
     images = [item["image"] for item in batch]
     image_paths = [item.get("image_path") for item in batch]
+    original_texts = [item["text"] for item in batch]
     
     processed = processor(images=images, text=texts, return_tensors="pt", padding=True, truncation=True)
     
     if all(image_paths):
         processed['image_paths'] = image_paths
         
+    processed['original_text'] = original_texts
     return processed
 
 def llava_collate_fn(batch, processor):
     texts = [f"<image>\nUSER: {item['text']}\nASSISTANT:" for item in batch]
     images = [item["image"] for item in batch]
     image_paths = [item.get("image_path") for item in batch]
+    original_texts = [item["text"] for item in batch]
 
     processed = processor(text=texts, images=images, return_tensors="pt", padding=True, truncation=True)
     
     if all(image_paths):
         processed['image_paths'] = image_paths
 
+    processed['original_text'] = original_texts
     return processed
 
 def clip_collate_fn(batch, processor):
     texts = [item["text"] for item in batch]
     images = [item["image"] for item in batch]
     image_paths = [item.get("image_path") for item in batch]
+    original_texts = [item["text"] for item in batch]
     
     processed = processor(text=texts, images=images, return_tensors="pt", padding=True, truncation=True)
     
     if all(image_paths):
         processed['image_paths'] = image_paths
-        
+
+    processed['original_text'] = original_texts
     return processed
 
 def unimed_collate_fn(batch, processor):
     images = [item["image"] for item in batch]
     texts = [item["text"] for item in batch]
     image_paths = [item.get("image_path") for item in batch]
+    original_texts = [item["text"] for item in batch]
     
     # processor is the transform function
     processed_images = torch.stack([processor(img) for img in images])
@@ -78,5 +85,6 @@ def unimed_collate_fn(batch, processor):
     
     if all(image_paths):
         batch_out['image_paths'] = image_paths
-        
+
+    batch_out['original_text'] = original_texts
     return batch_out

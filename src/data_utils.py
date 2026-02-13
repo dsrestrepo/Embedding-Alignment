@@ -233,7 +233,7 @@ def process_labels(df, col='answer', mlb=None, train_columns=None):
 
     if mlb is None:
         mlb = MultiLabelBinarizer()
-# ...existing code...
+
 
         if df[col].dtype == int:
             label = df[col]

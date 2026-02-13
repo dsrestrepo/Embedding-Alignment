@@ -26,6 +26,7 @@ def modify_and_normalize_embeddings(text_embeddings, image_embeddings, lambda_sh
     """Shift and normalize embeddings."""
     # Check and match dimensions
     if text_embeddings.shape[1] != image_embeddings.shape[1]:
+        print('Warning: Text and image embeddings have different dimensions. Interpolating to match dimensions.')
         if text_embeddings.shape[1] > image_embeddings.shape[1]:
             image_embeddings = interpolate_embeddings(image_embeddings, text_embeddings.shape[1])
         else:
@@ -71,8 +72,8 @@ def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift,
 
     # Plotting in 2D with unit circle
     plt.figure(figsize=(10, 6))
-    circle = plt.Circle((0, 0), 1, color='green', fill=False)
-    plt.gca().add_artist(circle)
+    #circle = plt.Circle((0, 0), 1, color='green', fill=False)
+    #plt.gca().add_artist(circle)
     plt.scatter(reduced_text_embeddings[:, 0], reduced_text_embeddings[:, 1], label='Text Embeddings', alpha=0.5)
     plt.scatter(reduced_image_embeddings[:, 0], reduced_image_embeddings[:, 1], label='Image Embeddings', alpha=0.5)
     plt.legend(loc='upper right')
@@ -105,7 +106,7 @@ def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift,
     x = np.cos(u)*np.sin(v)
     y = np.sin(u)*np.sin(v)
     z = np.cos(v)
-    ax.plot_wireframe(x, y, z, color="r", alpha=0.1)
+    #ax.plot_wireframe(x, y, z, color="r", alpha=0.1)
     
     ax.set_title(title + ' in 3D')
     ax.set_xlabel('PCA Component 1', labelpad=10)

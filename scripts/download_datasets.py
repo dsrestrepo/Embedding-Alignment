@@ -54,10 +54,8 @@ def process_fakeddit(output_dir, subset_size=1.0, download_mode="url"):
         # Download only the specific images for the subset from their source URLs
         print("Downloading images from URLs (this avoids downloading the full 100GB dataset)...")
         download_images_from_file(output_dir)
-    else:
-         # Drive mode: We also run check to verify file integrity and clean csv
-        print("Verifying downloaded dataset and cleaning invalid rows...")
-        download_images_from_file(output_dir)
+        print('Done! Since some images can still be missing due to URL issues, or can be corrupted, we recommend to check the notebook in Notebooks/check_fakeddit_images.ipynb to verify the integrity of the downloaded images and handle any missing/corrupted files.')
+
     
 def process_recipes5k(output_dir):
     print("Processing Recipes5k...")
