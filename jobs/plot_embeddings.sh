@@ -22,7 +22,7 @@ DATASET="Recipes5k daquar coco-qa fakeddit brset ham10000 mimic mbrset"
 BACKBONE="CLIP SigLIP MedSigLIP BioMedCLIP"
 
 # Using a base output directory structure
-OUTPUT_DIR="Images/Alignment"
+OUTPUT_DIR="Images/Embedding_Plots"
 
 # Create output dir
 mkdir -p "$OUTPUT_DIR"
@@ -33,4 +33,4 @@ python scripts/plot_embeddings.py \
     --datasets $DATASET \
     --backbones $BACKBONE \
     --output_dir "$OUTPUT_DIR" \
-    --shifts -1 0 1
+    --shifts -1 -0.5 0 0.5 1

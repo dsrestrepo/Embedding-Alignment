@@ -72,11 +72,12 @@ class EarlyFusionModel(nn.Module):
         
         # Add the linear layer and ReLU activation if 'hidden' is an integer
         if isinstance(hidden, int):
-            layers.append(nn.Linear(output_dim, hidden))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(p=self.p))
-
-            output_dim = hidden
+            if hidden > 0:
+                layers.append(nn.Linear(output_dim, hidden))
+                layers.append(nn.ReLU())
+                layers.append(nn.Dropout(p=self.p))
+                output_dim = hidden
+            # If hidden is 0 or less, we add nothing (linear probing logic handled by default output_dim)
             
         # Add the linear layer and ReLU activation for each element in 'hidden' if it's a list
         elif isinstance(hidden, list):
@@ -87,6 +88,8 @@ class EarlyFusionModel(nn.Module):
                 layers.append(nn.BatchNorm1d(h))
                 output_dim = h
         
+        # If no layers were added (linear Probe), this sequential is effectively Identity if empty? 
+        # Actually nn.Sequential with no args is identity.
         self.fc1 = nn.Sequential(*layers)
 
         #self.fc1 = nn.Linear(text_input_size + image_input_size, hidden)
@@ -144,11 +147,12 @@ class LateFusionModel(nn.Module):
         
         # Add the linear layer and ReLU activation if 'hidden' is an integer
         if isinstance(hidden, int):
-            layers.append(nn.Linear(output_dim, hidden))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(p=p))
-
-            output_dim = hidden
+            if hidden > 0:
+                layers.append(nn.Linear(output_dim, hidden))
+                layers.append(nn.ReLU())
+                layers.append(nn.Dropout(p=p))
+                output_dim = hidden
+            # If hidden is 0, no layers added
             
         # Add the linear layer and ReLU activation for each element in 'hidden' if it's a list
         elif isinstance(hidden, list):
@@ -275,7 +279,7 @@ def test_model(y_test, y_pred, V=True):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, adam=False, p=0.0, V=True, val_loader=None, patience=5):
+def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, adam=False, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]):
     """
     Train an Early Fusion Model.
 
@@ -288,6 +292,7 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     - num_epochs (int): Number of training epochs.
     - multilabel (bool): Flag for multilabel classification.
     - report (bool): Flag to generate a classification report, confusion matrix, and ROC curve.
+    - hidden (int or list): Hidden layer configuration.
 
     Example:
     train_early_fusion(train_loader, test_loader, text_input_size=512, image_input_size=256, output_size=10, num_epochs=5, multilabel=True)
@@ -295,7 +300,7 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = EarlyFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p)
+    model = EarlyFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p, hidden=hidden)
     model = model.to(device)
     model = nn.DataParallel(model)
     
@@ -471,7 +476,7 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
             
 
 # Function to train late fusion model (similar changes)
-def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, p=0.0, V=True, val_loader=None, patience=5): 
+def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]): 
     """
     Train a Late Fusion Model.
 
@@ -484,12 +489,13 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     - num_epochs (int): Number of training epochs.
     - multilabel (bool): Flag for multilabel classification.
     - report (bool): Flag to generate a classification report, confusion matrix, and ROC curve.
+    - hidden (int or list): Hidden layer configuration.
 
     Example:
     train_late_fusion(train_loader, test_loader, text_input_size=512, image_input_size=256, output_size=10, num_epochs=5, multilabel=True)
     """
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = LateFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p)
+    model = LateFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p, hidden_images=hidden, hidden_text=hidden)
     model = nn.DataParallel(model)
     
     model.to(device)

@@ -10,9 +10,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.003473087627230767
 Mean Variance of PCA-transformed image embeddings: 0.01680323100082701
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.004822677454089102
+Mean Variance of PCA-transformed image embeddings: 0.0209946813081125
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.006702813010828903
 Mean Variance of PCA-transformed image embeddings: 0.025276165575422792
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.009199444580613335
+Mean Variance of PCA-transformed image embeddings: 0.02854953791726614
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.02113608906237301
 Mean Variance of PCA-transformed image embeddings: 0.033709725808278426
@@ -26,9 +32,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.011433688489174039
 Mean Variance of PCA-transformed image embeddings: 0.004617154704295453
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.014997930761916302
+Mean Variance of PCA-transformed image embeddings: 0.0061704319890630195
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.019187014946093497
 Mean Variance of PCA-transformed image embeddings: 0.00816680314733646
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.022877251894535152
+Mean Variance of PCA-transformed image embeddings: 0.010255904071343629
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.0360531352791819
 Mean Variance of PCA-transformed image embeddings: 0.014484487244331708
@@ -40,14 +52,20 @@ Processing Dataset: Recipes5k | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.05005607755794814
-Mean Variance of PCA-transformed image embeddings: 0.0002212489912668009
+Mean Variance of PCA-transformed text embeddings: 0.05005607756095654
+Mean Variance of PCA-transformed image embeddings: 0.00022124898816841407
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.06642214235682656
+Mean Variance of PCA-transformed image embeddings: 0.0003646686082633174
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.08589747734171896
-Mean Variance of PCA-transformed image embeddings: 0.0006105879252809057
+Mean Variance of PCA-transformed text embeddings: 0.08589747736425483
+Mean Variance of PCA-transformed image embeddings: 0.0006105879082847674
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.1028714239911376
+Mean Variance of PCA-transformed image embeddings: 0.0010250274459460969
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.11912288109801143
-Mean Variance of PCA-transformed image embeddings: 0.013783069175178013
+Mean Variance of PCA-transformed text embeddings: 0.11912116425140454
+Mean Variance of PCA-transformed image embeddings: 0.013784790547047253
 
 ==================================================
 Processing Dataset: Recipes5k | Backbone: BioMedCLIP
@@ -58,9 +76,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.019227929529916612
 Mean Variance of PCA-transformed image embeddings: 0.00029583716421950764
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.027349839102326145
+Mean Variance of PCA-transformed image embeddings: 0.00047679453774326236
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.03900482647096209
 Mean Variance of PCA-transformed image embeddings: 0.0007930958949598616
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.05199813554900901
+Mean Variance of PCA-transformed image embeddings: 0.0012088480175421394
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.06489734715531612
 Mean Variance of PCA-transformed image embeddings: 0.007987455272676715
@@ -74,9 +98,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0038092945618362004
 Mean Variance of PCA-transformed image embeddings: 0.00703096973013115
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.005026496825142461
+Mean Variance of PCA-transformed image embeddings: 0.009309742038187758
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.0064181970958172175
 Mean Variance of PCA-transformed image embeddings: 0.012182187423416051
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.007690374722399673
+Mean Variance of PCA-transformed image embeddings: 0.015152241813346568
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.018544962215461064
 Mean Variance of PCA-transformed image embeddings: 0.01981633524755063
@@ -90,9 +120,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0009630353371295878
 Mean Variance of PCA-transformed image embeddings: 0.006888796559976215
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0014004391049489858
+Mean Variance of PCA-transformed image embeddings: 0.009371429640003997
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.002070986266089201
 Mean Variance of PCA-transformed image embeddings: 0.012514724655259858
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0029555776915166764
+Mean Variance of PCA-transformed image embeddings: 0.015425682747033402
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.005363533821235925
 Mean Variance of PCA-transformed image embeddings: 0.030016791480779514
@@ -104,14 +140,20 @@ Processing Dataset: daquar | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.01912028236940684
-Mean Variance of PCA-transformed image embeddings: 0.0005388961421825039
+Mean Variance of PCA-transformed text embeddings: 0.019120282393038115
+Mean Variance of PCA-transformed image embeddings: 0.0005388961181907912
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.02782990742952954
+Mean Variance of PCA-transformed image embeddings: 0.0009495342075137151
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.04031748070497669
-Mean Variance of PCA-transformed image embeddings: 0.0017929675872586312
+Mean Variance of PCA-transformed text embeddings: 0.04031748092400366
+Mean Variance of PCA-transformed image embeddings: 0.0017929673330376854
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.053455816664039646
+Mean Variance of PCA-transformed image embeddings: 0.0036851749423345123
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.05852763142545567
-Mean Variance of PCA-transformed image embeddings: 0.026057048054840277
+Mean Variance of PCA-transformed text embeddings: 0.05852763190041853
+Mean Variance of PCA-transformed image embeddings: 0.026057047733381106
 
 ==================================================
 Processing Dataset: daquar | Backbone: BioMedCLIP
@@ -122,9 +164,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.01736568630666905
 Mean Variance of PCA-transformed image embeddings: 0.00038957190215952077
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.026647084359301316
+Mean Variance of PCA-transformed image embeddings: 0.0006661732668878454
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.0426508376896932
 Mean Variance of PCA-transformed image embeddings: 0.0012706417038615943
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.06569983209392168
+Mean Variance of PCA-transformed image embeddings: 0.002694692519749605
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.08150507960234056
 Mean Variance of PCA-transformed image embeddings: 0.025032084587814085
@@ -138,9 +186,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.009922250646867345
 Mean Variance of PCA-transformed image embeddings: 0.016703543490077744
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.01259235476836782
+Mean Variance of PCA-transformed image embeddings: 0.02048261302431557
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.015722649521980773
 Mean Variance of PCA-transformed image embeddings: 0.024286079020775193
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.01865084812097785
+Mean Variance of PCA-transformed image embeddings: 0.030808707875382042
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.02801447029893938
 Mean Variance of PCA-transformed image embeddings: 0.058407214256203134
@@ -154,9 +208,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0014125621038463968
 Mean Variance of PCA-transformed image embeddings: 0.01126028235077058
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0020523632789559063
+Mean Variance of PCA-transformed image embeddings: 0.014308290706539627
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.0030766057549551752
 Mean Variance of PCA-transformed image embeddings: 0.017318426543679086
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.004740795485105384
+Mean Variance of PCA-transformed image embeddings: 0.018927228423864843
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.005584925752847243
 Mean Variance of PCA-transformed image embeddings: 0.033587670826239216
@@ -168,14 +228,20 @@ Processing Dataset: coco-qa | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.03673012328749795
-Mean Variance of PCA-transformed image embeddings: 0.00025403251872064257
+Mean Variance of PCA-transformed text embeddings: 0.036730123293807204
+Mean Variance of PCA-transformed image embeddings: 0.00025403251151552493
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.05068824459197099
+Mean Variance of PCA-transformed image embeddings: 0.0004257750083321075
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.0702400833931667
-Mean Variance of PCA-transformed image embeddings: 0.0006755854921415704
+Mean Variance of PCA-transformed text embeddings: 0.07024008346218832
+Mean Variance of PCA-transformed image embeddings: 0.0006755854170054611
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.09363399058019399
+Mean Variance of PCA-transformed image embeddings: 0.0008906287118832139
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.10783372157343937
-Mean Variance of PCA-transformed image embeddings: 0.021026547542080058
+Mean Variance of PCA-transformed text embeddings: 0.10783388878224413
+Mean Variance of PCA-transformed image embeddings: 0.02102637814637263
 
 ==================================================
 Processing Dataset: coco-qa | Backbone: BioMedCLIP
@@ -186,9 +252,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.009544311913523494
 Mean Variance of PCA-transformed image embeddings: 0.0008553970869115649
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0139825326355437
+Mean Variance of PCA-transformed image embeddings: 0.0012446684899543978
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.021235439274829838
 Mean Variance of PCA-transformed image embeddings: 0.0018238046515053165
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.03198020935906992
+Mean Variance of PCA-transformed image embeddings: 0.0027050805275459517
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.04138158544746734
 Mean Variance of PCA-transformed image embeddings: 0.021169775225128324
@@ -202,9 +274,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0066239673170837175
 Mean Variance of PCA-transformed image embeddings: 0.018523557285216357
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.008187332367284111
+Mean Variance of PCA-transformed image embeddings: 0.022149477193173103
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.009881085855182475
 Mean Variance of PCA-transformed image embeddings: 0.02567479837613767
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.011490130833296785
+Mean Variance of PCA-transformed image embeddings: 0.028701749136175708
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.019955135302518086
 Mean Variance of PCA-transformed image embeddings: 0.046176094671897615
@@ -218,9 +296,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.004172047900425561
 Mean Variance of PCA-transformed image embeddings: 0.010845739145532203
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0058088826386965605
+Mean Variance of PCA-transformed image embeddings: 0.013358302327512197
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.008092100285388952
 Mean Variance of PCA-transformed image embeddings: 0.01572482755743272
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.011953332651807324
+Mean Variance of PCA-transformed image embeddings: 0.01703729767969177
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.025005215622147567
 Mean Variance of PCA-transformed image embeddings: 0.01663667665230589
@@ -232,14 +316,20 @@ Processing Dataset: fakeddit | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.02932250523609592
-Mean Variance of PCA-transformed image embeddings: 0.0003902687751081167
+Mean Variance of PCA-transformed text embeddings: 0.02932250468318076
+Mean Variance of PCA-transformed image embeddings: 0.00039026932800060774
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0376618528816284
+Mean Variance of PCA-transformed image embeddings: 0.0006013480391813105
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.04719780005908002
-Mean Variance of PCA-transformed image embeddings: 0.0009031616343636076
+Mean Variance of PCA-transformed text embeddings: 0.047197800182861314
+Mean Variance of PCA-transformed image embeddings: 0.0009031615611919444
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.05570787163254844
+Mean Variance of PCA-transformed image embeddings: 0.0013639099669210705
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.05937254842558951
-Mean Variance of PCA-transformed image embeddings: 0.019961168114360016
+Mean Variance of PCA-transformed text embeddings: 0.0593726150793015
+Mean Variance of PCA-transformed image embeddings: 0.01996110072753686
 
 ==================================================
 Processing Dataset: fakeddit | Backbone: BioMedCLIP
@@ -250,9 +340,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0063950746542415175
 Mean Variance of PCA-transformed image embeddings: 0.005380086785439962
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.011264276090906498
+Mean Variance of PCA-transformed image embeddings: 0.006356240830056923
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.020983638134916868
 Mean Variance of PCA-transformed image embeddings: 0.006476152075654641
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.03551244500881333
+Mean Variance of PCA-transformed image embeddings: 0.007939524766219976
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.05466927449280441
 Mean Variance of PCA-transformed image embeddings: 0.01913297246108655
@@ -266,9 +362,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 7.01971446342248e-05
 Mean Variance of PCA-transformed image embeddings: 0.0035294162997896454
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 9.831583665341319e-05
+Mean Variance of PCA-transformed image embeddings: 0.004743379159412942
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.00013721181239266503
 Mean Variance of PCA-transformed image embeddings: 0.006246367353558882
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.00017784247704439438
+Mean Variance of PCA-transformed image embeddings: 0.007617766657293031
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.0003263118199153017
 Mean Variance of PCA-transformed image embeddings: 0.014411830303420092
@@ -282,9 +384,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.002755160458494302
 Mean Variance of PCA-transformed image embeddings: 2.526716622054936e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0038614734491134355
+Mean Variance of PCA-transformed image embeddings: 4.4534186609199777e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.005410992233557363
 Mean Variance of PCA-transformed image embeddings: 7.917610713877767e-05
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.007117267172461121
+Mean Variance of PCA-transformed image embeddings: 0.00011946996767554877
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.013789993449395074
 Mean Variance of PCA-transformed image embeddings: 6.566486980456998e-05
@@ -296,14 +404,20 @@ Processing Dataset: brset | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/brset/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.0009495140664861835
-Mean Variance of PCA-transformed image embeddings: 0.03170932684896753
+Mean Variance of PCA-transformed text embeddings: 0.0009495140664861638
+Mean Variance of PCA-transformed image embeddings: 0.03170932684896745
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0014282665320216141
+Mean Variance of PCA-transformed image embeddings: 0.045519825376101816
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.0023094303166599417
-Mean Variance of PCA-transformed image embeddings: 0.06414256017684764
+Mean Variance of PCA-transformed text embeddings: 0.0023094303163049995
+Mean Variance of PCA-transformed image embeddings: 0.0641425601772042
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.003967038186704037
+Mean Variance of PCA-transformed image embeddings: 0.08066024424484537
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.006350598155537919
-Mean Variance of PCA-transformed image embeddings: 0.1195592443647372
+Mean Variance of PCA-transformed text embeddings: 0.006350598150704854
+Mean Variance of PCA-transformed image embeddings: 0.1195592443284049
 
 ==================================================
 Processing Dataset: brset | Backbone: BioMedCLIP
@@ -314,9 +428,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0052932603572613335
 Mean Variance of PCA-transformed image embeddings: 1.5208059912866812e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.007797302048144304
+Mean Variance of PCA-transformed image embeddings: 2.8184263700351445e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.011748790851755708
 Mean Variance of PCA-transformed image embeddings: 5.682469728994861e-05
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0167939427042777
+Mean Variance of PCA-transformed image embeddings: 0.00010599252361756005
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.031375426857298626
 Mean Variance of PCA-transformed image embeddings: 0.00010628654801928306
@@ -330,9 +450,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.015661807545412094
 Mean Variance of PCA-transformed image embeddings: 0.0005687219560744168
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.02152290584036628
+Mean Variance of PCA-transformed image embeddings: 0.0009063945524941725
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.029178203234294688
 Mean Variance of PCA-transformed image embeddings: 0.0014756455741213688
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.03667698844727141
+Mean Variance of PCA-transformed image embeddings: 0.0022582519097292418
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.06368145008946133
 Mean Variance of PCA-transformed image embeddings: 0.0019853602346984137
@@ -346,9 +472,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.02951612505531023
 Mean Variance of PCA-transformed image embeddings: 0.00027438195182362624
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.04077653696163845
+Mean Variance of PCA-transformed image embeddings: 0.0004321502621584388
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.05603024417695017
 Mean Variance of PCA-transformed image embeddings: 0.000689267213116569
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0721998061147515
+Mean Variance of PCA-transformed image embeddings: 0.0010029790863786763
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.07991525911033856
 Mean Variance of PCA-transformed image embeddings: 0.02148102114054993
@@ -360,14 +492,20 @@ Processing Dataset: ham10000 | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 5.8574415774722436e-05
-Mean Variance of PCA-transformed image embeddings: 0.009893796435341655
+Mean Variance of PCA-transformed text embeddings: 5.8574404696423087e-05
+Mean Variance of PCA-transformed image embeddings: 0.00989379644638408
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.00010802959979725184
+Mean Variance of PCA-transformed image embeddings: 0.014915179512418593
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.0002636235107859613
-Mean Variance of PCA-transformed image embeddings: 0.022848627498515975
+Mean Variance of PCA-transformed text embeddings: 0.00026362351239233786
+Mean Variance of PCA-transformed image embeddings: 0.022848627497215526
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0015172442791206954
+Mean Variance of PCA-transformed image embeddings: 0.031151257689018143
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.03527108860522241
-Mean Variance of PCA-transformed image embeddings: 0.03350186048423286
+Mean Variance of PCA-transformed text embeddings: 0.0352710886619558
+Mean Variance of PCA-transformed image embeddings: 0.03350186029930957
 
 ==================================================
 Processing Dataset: ham10000 | Backbone: BioMedCLIP
@@ -378,9 +516,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.027892609746536783
 Mean Variance of PCA-transformed image embeddings: 8.365199304291753e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.04100216772207249
+Mean Variance of PCA-transformed image embeddings: 0.00016006204514955015
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.060707846855665056
 Mean Variance of PCA-transformed image embeddings: 0.0003470300000928395
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0864717197443359
+Mean Variance of PCA-transformed image embeddings: 0.0007698801823555624
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.1658538360080256
 Mean Variance of PCA-transformed image embeddings: 0.00048799283703944104
@@ -394,9 +538,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0047076078130395705
 Mean Variance of PCA-transformed image embeddings: 0.008780240794001802
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.006187269656847063
+Mean Variance of PCA-transformed image embeddings: 0.011542755161549489
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.007957873825084286
 Mean Variance of PCA-transformed image embeddings: 0.014914338372853216
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.009629099885085235
+Mean Variance of PCA-transformed image embeddings: 0.018146916009997276
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.017419798734933392
 Mean Variance of PCA-transformed image embeddings: 0.026670881500395427
@@ -410,9 +560,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.006583474467851661
 Mean Variance of PCA-transformed image embeddings: 5.574359342019349e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.009042846390148202
+Mean Variance of PCA-transformed image embeddings: 9.433848201272706e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.012183296129385957
 Mean Variance of PCA-transformed image embeddings: 0.00016323328023100663
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.01502238301849355
+Mean Variance of PCA-transformed image embeddings: 0.0002605086952846095
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.023403141306175816
 Mean Variance of PCA-transformed image embeddings: 0.001019649264555117
@@ -424,14 +580,20 @@ Processing Dataset: mimic | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.02255579434001212
-Mean Variance of PCA-transformed image embeddings: 0.024764791421581493
+Mean Variance of PCA-transformed text embeddings: 0.022555795098331277
+Mean Variance of PCA-transformed image embeddings: 0.024764790663403657
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.030206740457330603
+Mean Variance of PCA-transformed image embeddings: 0.03318358699311978
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.039930426363093595
-Mean Variance of PCA-transformed image embeddings: 0.0439369741856083
+Mean Variance of PCA-transformed text embeddings: 0.039930426259487416
+Mean Variance of PCA-transformed image embeddings: 0.043936974290239225
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.05009991160227305
+Mean Variance of PCA-transformed image embeddings: 0.05506448078153869
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.08701447675504502
-Mean Variance of PCA-transformed image embeddings: 0.0801074102321544
+Mean Variance of PCA-transformed text embeddings: 0.08701447211269767
+Mean Variance of PCA-transformed image embeddings: 0.08010741487865633
 
 ==================================================
 Processing Dataset: mimic | Backbone: BioMedCLIP
@@ -442,9 +604,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.005789860382997389
 Mean Variance of PCA-transformed image embeddings: 4.7537218959999426e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.008339463648214975
+Mean Variance of PCA-transformed image embeddings: 7.935889324428512e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.011956989955198222
 Mean Variance of PCA-transformed image embeddings: 0.0001511842581149437
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.015534434389932563
+Mean Variance of PCA-transformed image embeddings: 0.00033073313940840983
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.020925599625561415
 Mean Variance of PCA-transformed image embeddings: 0.007300446047364408
@@ -458,9 +626,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.00018930984167733308
 Mean Variance of PCA-transformed image embeddings: 0.003592149160423507
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.00029902717695139326
+Mean Variance of PCA-transformed image embeddings: 0.005051732477695608
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.0004965009059585763
 Mean Variance of PCA-transformed image embeddings: 0.007064371710454749
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0007822409008523506
+Mean Variance of PCA-transformed image embeddings: 0.009128962444271015
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.0028273090881778136
 Mean Variance of PCA-transformed image embeddings: 0.01598628143604513
@@ -474,9 +648,15 @@ Found 512 text columns and 512 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0032105890714473435
 Mean Variance of PCA-transformed image embeddings: 1.8894788864026503e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.004613718541225361
+Mean Variance of PCA-transformed image embeddings: 3.690149262516961e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.006708868124107293
 Mean Variance of PCA-transformed image embeddings: 7.286889195632941e-05
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.009224351500396974
+Mean Variance of PCA-transformed image embeddings: 0.0001172364904254412
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.010567208382677419
 Mean Variance of PCA-transformed image embeddings: 0.0031868211958350347
@@ -488,14 +668,20 @@ Processing Dataset: mbrset | Backbone: MedSigLIP
 Loading data from /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/embeddings_medsiglip.csv
 Found 1152 text columns and 1152 image columns.
 Processing shift: -1.0
-Mean Variance of PCA-transformed text embeddings: 0.00011768396458173113
-Mean Variance of PCA-transformed image embeddings: 0.01804566023837382
+Mean Variance of PCA-transformed text embeddings: 0.00011768400309116005
+Mean Variance of PCA-transformed image embeddings: 0.018045660199868193
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.0002123807850138498
+Mean Variance of PCA-transformed image embeddings: 0.027283377607220844
 Processing shift: 0.0
-Mean Variance of PCA-transformed text embeddings: 0.00045839036051253213
-Mean Variance of PCA-transformed image embeddings: 0.04184388889413828
+Mean Variance of PCA-transformed text embeddings: 0.00045839036073498174
+Mean Variance of PCA-transformed image embeddings: 0.041843888893940404
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.0012105606836270118
+Mean Variance of PCA-transformed image embeddings: 0.057952777730978955
 Processing shift: 1.0
-Mean Variance of PCA-transformed text embeddings: 0.003966440441683593
-Mean Variance of PCA-transformed image embeddings: 0.09411730669552887
+Mean Variance of PCA-transformed text embeddings: 0.003966471624462825
+Mean Variance of PCA-transformed image embeddings: 0.09411730637520274
 
 ==================================================
 Processing Dataset: mbrset | Backbone: BioMedCLIP
@@ -506,9 +692,15 @@ Found 768 text columns and 768 image columns.
 Processing shift: -1.0
 Mean Variance of PCA-transformed text embeddings: 0.0032144544348215415
 Mean Variance of PCA-transformed image embeddings: 2.307471295949653e-05
+Processing shift: -0.5
+Mean Variance of PCA-transformed text embeddings: 0.004880372175629156
+Mean Variance of PCA-transformed image embeddings: 4.138251438828638e-05
 Processing shift: 0.0
 Mean Variance of PCA-transformed text embeddings: 0.007741668588445763
 Mean Variance of PCA-transformed image embeddings: 8.265999039202833e-05
+Processing shift: 0.5
+Mean Variance of PCA-transformed text embeddings: 0.011915849252509986
+Mean Variance of PCA-transformed image embeddings: 0.0001549753857989494
 Processing shift: 1.0
 Mean Variance of PCA-transformed text embeddings: 0.021442100064349427
 Mean Variance of PCA-transformed image embeddings: 0.00015130044511650961

@@ -26,7 +26,11 @@ BACKBONE="BioMedCLIP CLIP MedSigLIP SigLIP "
 # Multilabel flags corresponding to DATASET (Recipes5k=False, daquar=True, coco-qa=False, fakeddit=False, brset=False, ham10000=False, mimic=True, mbrset=False)
 MULTILABEL="False False True False" #"False True False False False False True False"
 LABEL_COLUMN="DR_2 dx disease_label DR_2" #"class answer answers 2_way_label DR_2 dx disease_label DR_2"
-OUTPUT_DIR="Images/Alignment"
+MODEL_TYPE="early" # Options: 'early', 'late', 'both'
+HIDDEN=0 # For multiple hidden layers: "128 64" ... for linear only: "0"
+EPOCHS=100
+N_RUNS=5
+OUTPUT_DIR="Images/Alignment_early_linear_5runs"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -38,5 +42,7 @@ python scripts/run_alignment.py \
     --label_columns $LABEL_COLUMN \
     --multilabels $MULTILABEL \
     --output_dir "$OUTPUT_DIR" \
-    --epochs 100 \
-    --model_type both
+    --epochs $EPOCHS \
+    --n_runs $N_RUNS \
+    --model_type $MODEL_TYPE \
+    --hidden $HIDDEN
