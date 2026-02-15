@@ -279,7 +279,7 @@ def test_model(y_test, y_pred, V=True):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, adam=False, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]):
+def train_early_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=3e-4, set_weights=True, adam=False, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]):
     """
     Train an Early Fusion Model.
 
@@ -299,34 +299,43 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
     """
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        torch.backends.cudnn.benchmark = True
 
     model = EarlyFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p, hidden=hidden)
     model = model.to(device)
-    model = nn.DataParallel(model)
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     
     
     
     print(f'The number of parameters of the model are: {count_parameters(model)}')
     
     if set_weights:
+        # Convert tensor to numpy for sklearn compatibility if needed or use torch operations
+        labels_tensor = train_loader.dataset.labels
+        
         if not multilabel:
             # Check if labels are 1D (binary/sparse) or 2D (one-hot)
-            if train_loader.dataset.labels.ndim == 1:
-                class_indices = train_loader.dataset.labels.astype(int)
+            if labels_tensor.ndim == 1:
+                class_indices = labels_tensor.cpu().numpy().astype(int)
             else:
-                class_indices = np.argmax(train_loader.dataset.labels, axis=1)
+                class_indices = torch.argmax(labels_tensor, dim=1).cpu().numpy()
 
             # Compute class weights using class indices
             class_weights = compute_class_weight('balanced', classes=np.unique(class_indices), y=class_indices)
             class_weights = torch.tensor(class_weights, dtype=torch.float32)
         else:
-            class_counts = train_loader.dataset.labels.sum(axis=0)
-            total_samples = len(train_loader.dataset.labels)
-            num_classes = train_loader.dataset.labels.shape[1]
+            class_counts = labels_tensor.sum(dim=0)
+            total_samples = len(labels_tensor)
+            num_classes = labels_tensor.shape[1]
+            
+            # Use torch operations for class weights calculation
+            # Add small epsilon or manipulate to avoid div by zero if necessary, though balanced usually assumes existence
             class_weights = total_samples / (num_classes * class_counts)
 
             # Convert class_weights to a PyTorch tensor
-            class_weights = torch.tensor(class_weights, dtype=torch.float32)
+            class_weights = class_weights.float()
     else:
         class_weights = None
         
@@ -361,7 +370,7 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
         model.train()
 
         for batch in train_loader:
-            text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+            text, image, labels = batch['text'].to(device, non_blocking=True), batch['image'].to(device, non_blocking=True), batch['labels'].to(device, non_blocking=True)
             optimizer.zero_grad()
             outputs = model(text, image)
             
@@ -476,7 +485,7 @@ def train_early_fusion(train_loader, test_loader, text_input_size, image_input_s
             
 
 # Function to train late fusion model (similar changes)
-def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=0.001, set_weights=True, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]): 
+def train_late_fusion(train_loader, test_loader, text_input_size, image_input_size, output_size, num_epochs=5, multilabel=True, report=False, lr=3e-4, set_weights=True, p=0.0, V=True, val_loader=None, patience=5, hidden=[128]): 
     """
     Train a Late Fusion Model.
 
@@ -495,33 +504,42 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
     train_late_fusion(train_loader, test_loader, text_input_size=512, image_input_size=256, output_size=10, num_epochs=5, multilabel=True)
     """
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        torch.backends.cudnn.benchmark = True
+        
     model = LateFusionModel(text_input_size=text_input_size, image_input_size=image_input_size, output_size=output_size, p=p, hidden_images=hidden, hidden_text=hidden)
-    model = nn.DataParallel(model)
+    
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     
     model.to(device)
     
     print(f'The number of parameters of the model are: {count_parameters(model)}')
     
     if set_weights:
+        # Convert tensor to numpy for sklearn compatibility if needed or use torch operations
+        labels_tensor = train_loader.dataset.labels
 
         if not multilabel:
             # Check if labels are 1D (binary/sparse) or 2D (one-hot)
-            if train_loader.dataset.labels.ndim == 1:
-                class_indices = train_loader.dataset.labels.astype(int)
+            if labels_tensor.ndim == 1:
+                class_indices = labels_tensor.cpu().numpy().astype(int)
             else:
-                class_indices = np.argmax(train_loader.dataset.labels, axis=1)
+                class_indices = torch.argmax(labels_tensor, dim=1).cpu().numpy()
 
             # Compute class weights using class indices
             class_weights = compute_class_weight('balanced', classes=np.unique(class_indices), y=class_indices)
             class_weights = torch.tensor(class_weights, dtype=torch.float32)
         else:
-            class_counts = train_loader.dataset.labels.sum(axis=0)
-            total_samples = len(train_loader.dataset.labels)
-            num_classes = train_loader.dataset.labels.shape[1]
+            class_counts = labels_tensor.sum(dim=0)
+            total_samples = len(labels_tensor)
+            num_classes = labels_tensor.shape[1]
+            
+            # Use torch operations for class weights calculation
             class_weights = total_samples / (num_classes * class_counts)
 
             # Convert class_weights to a PyTorch tensor
-            class_weights = torch.tensor(class_weights, dtype=torch.float32)
+            class_weights = class_weights.float()
     else:
         class_weights = None
         
@@ -562,7 +580,7 @@ def train_late_fusion(train_loader, test_loader, text_input_size, image_input_si
 
         model.train()
         for batch in train_loader:
-            text, image, labels = batch['text'].to(device), batch['image'].to(device), batch['labels'].to(device)
+            text, image, labels = batch['text'].to(device, non_blocking=True), batch['image'].to(device, non_blocking=True), batch['labels'].to(device, non_blocking=True)
             optimizer.zero_grad()
             outputs = model(text, image)
             

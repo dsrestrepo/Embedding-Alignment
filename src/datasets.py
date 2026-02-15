@@ -17,15 +17,19 @@ class VQADataset(Dataset):
     - labels (np.ndarray): Optional, if labels are pre-processed and passed.
     """
     def __init__(self, df, text_cols, image_cols, label_col, mlb, train_columns, labels=None):
-        self.text_data = df[text_cols].values.astype(np.float32)
-        self.image_data = df[image_cols].values.astype(np.float32)
+        # Pre-convert to tensors for efficiency
+        self.text_data = torch.tensor(df[text_cols].values, dtype=torch.float32)
+        self.image_data = torch.tensor(df[image_cols].values, dtype=torch.float32)
         self.mlb = mlb
         self.train_columns = train_columns
         
         if labels is not None:
-            self.labels = labels.values.astype(np.float32)
+            # Handle if labels is a Series or DataFrame or numpy array
+            vals = labels.values if hasattr(labels, 'values') else labels
+            self.labels = torch.tensor(vals, dtype=torch.float32)
         elif label_col in df.columns:
-                self.labels = self.mlb.transform(df[label_col]).astype(np.float32)
+            encoded = self.mlb.transform(df[label_col])
+            self.labels = torch.tensor(encoded, dtype=torch.float32)
         else:
              self.labels = None
 
@@ -33,11 +37,12 @@ class VQADataset(Dataset):
         return len(self.text_data)
 
     def __getitem__(self, idx):
-        text_sample = torch.tensor(self.text_data[idx], dtype=torch.float32)
-        image_sample = torch.tensor(self.image_data[idx], dtype=torch.float32)
+        # Direct indexing of tensors is faster
+        text_sample = self.text_data[idx]
+        image_sample = self.image_data[idx]
         
-        if hasattr(self, 'labels') and self.labels is not None:
-            label = torch.tensor(self.labels[idx], dtype=torch.float32)
+        if self.labels is not None:
+            label = self.labels[idx]
             return {'text': text_sample, 'image': image_sample, 'labels': label}
         else:
             return {'text': text_sample, 'image': image_sample}

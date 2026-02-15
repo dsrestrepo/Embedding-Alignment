@@ -38,7 +38,7 @@ def main():
     
     parser.add_argument('--output_dir', type=str, required=True, help="Base output directory for results")
     parser.add_argument('--epochs', type=int, default=100, help="Number of epochs")
-    parser.add_argument('--batch_size', type=int, default=32, help="Batch size")
+    parser.add_argument('--batch_size', type=int, default=4096, help="Batch size")
     parser.add_argument('--val_size', type=float, default=0.1, help="Validation set size (fraction of train)")
     parser.add_argument('--model_type', type=str, default='both', choices=['early', 'late', 'both'], help="Model type to train")
     
@@ -249,9 +249,9 @@ def main():
                     val_dataset = VQADataset(val_df, text_columns, image_columns, label_column, mlb, train_target_columns, labels=val_labels) if val_df is not None else None
                     test_dataset = VQADataset(test_df, text_columns, image_columns, label_column, mlb, train_target_columns, labels=test_labels)
                     
-                    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2)
-                    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2) # Use val_loader for monitoring if implemented in train loop, else utilize for early stopping etc.
-                    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2)
+                    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, prefetch_factor=2, persistent_workers=True)
+                    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, prefetch_factor=2, persistent_workers=True) if val_dataset else None
+                    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, prefetch_factor=2, persistent_workers=True)
                     
                     # Note: train_early_fusion and train_late_fusion currently take train_loader and test_loader. 
                     text_input_size = len(text_columns)
