@@ -46,10 +46,55 @@ def modify_and_normalize_embeddings(text_embeddings, image_embeddings, lambda_sh
     return text_embeddings_shifted, image_embeddings_shifted
 
 
-def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift, DATASET, save=True, var=False, output_dir=None):
+def calculate_spherical_statistics(embeddings):
+    """
+    Calculate spherical statistics for a set of embeddings.
+    
+    Args:
+        embeddings: numpy array of shape (N, D), assumed to be L2 normalized.
+        
+    Returns:
+        mean_resultant_length (R): Measure of concentration (0 to 1). Higher = more concentrated (stronger cone).
+        spherical_variance (V): Measure of dispersion (0 to 1). Higher = more dispersed. V = 1 - R.
+    """
+    # Calculate the resultant vector (sum of all vectors)
+    resultant_vector = np.sum(embeddings, axis=0)
+    
+    # Calculate the length of the resultant vector
+    R_magnitude = np.linalg.norm(resultant_vector)
+    
+    # Mean Resultant Length (R_bar)
+    n = embeddings.shape[0]
+    mean_resultant_length = R_magnitude / n
+    
+    # Spherical Variance
+    spherical_variance = 1 - mean_resultant_length
+    
+    return mean_resultant_length, spherical_variance
+
+def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift, DATASET, save=True, var=False, output_dir=None, max_samples=5000):
     """Visualize embeddings in 2D and 3D, including the unit circle and sphere."""
     if output_dir is None:
         output_dir = f'Images/{DATASET}'
+    
+    # Subsample if there are too many points
+    if len(text_embeddings) > max_samples:
+        print(f"Subsampling {len(text_embeddings)} data points to {max_samples} for cleaner visualization.")
+        indices = np.random.choice(len(text_embeddings), max_samples, replace=False)
+        text_embeddings = text_embeddings[indices]
+        image_embeddings = image_embeddings[indices]
+    
+    # Set plot style for academic papers
+    plt.style.use('seaborn-v0_8-paper')
+    plt.rcParams.update({
+        'font.family': 'serif',
+        'font.serif': ['Times New Roman', 'DejaVu Serif'],
+        'axes.labelsize': 12,
+        'axes.titlesize': 14,
+        'legend.fontsize': 10,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10
+    })
 
     pca = PCA(n_components=2)
     all_embeddings = np.concatenate([text_embeddings, image_embeddings])
@@ -70,55 +115,110 @@ def visualize_embeddings(text_embeddings, image_embeddings, title, lambda_shift,
         print("Mean Variance of PCA-transformed text embeddings:", mean_variance_text)
         print("Mean Variance of PCA-transformed image embeddings:", mean_variance_image)
 
-    # Plotting in 2D with unit circle
-    plt.figure(figsize=(10, 6))
-    #circle = plt.Circle((0, 0), 1, color='green', fill=False)
-    #plt.gca().add_artist(circle)
-    plt.scatter(reduced_text_embeddings[:, 0], reduced_text_embeddings[:, 1], label='Text Embeddings', alpha=0.5)
-    plt.scatter(reduced_image_embeddings[:, 0], reduced_image_embeddings[:, 1], label='Image Embeddings', alpha=0.5)
-    plt.legend(loc='upper right')
-    plt.title(title + ' in 2D')
-    plt.xlabel('PCA Component 1')
-    plt.ylabel('PCA Component 2')
-    plt.xlim(-1.1, 1.1)
-    plt.ylim(-1.1, 1.1)
-    plt.gca().set_aspect('equal', adjustable='box')
+    # ---------------- 2D PLOT ----------------
+    fig_2d = plt.figure(figsize=(8, 8))
+    ax2 = plt.gca()
+
+    # Draw connections
+    for i in range(len(reduced_text_embeddings)):
+        ax2.plot([reduced_text_embeddings[i, 0], reduced_image_embeddings[i, 0]],
+                 [reduced_text_embeddings[i, 1], reduced_image_embeddings[i, 1]],
+                 color='gray', alpha=0.2, linewidth=0.5, zorder=1)
+
+    ax2.scatter(reduced_text_embeddings[:, 0], reduced_text_embeddings[:, 1], 
+                label='Text', alpha=0.7, s=30, edgecolors='w', linewidth=0.5, zorder=2, c='#1f77b4')
+    ax2.scatter(reduced_image_embeddings[:, 0], reduced_image_embeddings[:, 1], 
+                label='Image', alpha=0.7, s=30, edgecolors='w', linewidth=0.5, zorder=2, c='#ff7f0e')
+    
+    ax2.legend(loc='upper right', frameon=True, framealpha=0.9)
+    
+    plot_title = title + ' (2D PCA)'
+    ax2.set_title(plot_title, pad=20)
+        
+    ax2.set_xlabel('Principal Component 1')
+    ax2.set_ylabel('Principal Component 2')
+    
+    # Center the plot
+    max_range = np.max(np.abs(reduced_embeddings)) * 1.1
+    ax2.set_xlim(-max_range, max_range)
+    ax2.set_ylim(-max_range, max_range)
+    ax2.grid(True, linestyle='--', alpha=0.3)
+    ax2.set_aspect('equal', adjustable='box')
     
     img_path_2d = os.path.join(output_dir, f'2d_shift({lambda_shift}).pdf')
     if save:
         os.makedirs(os.path.dirname(img_path_2d), exist_ok=True)
-        plt.savefig(img_path_2d)
-    plt.show()
+        plt.savefig(img_path_2d, bbox_inches='tight', dpi=300)
+    plt.close(fig_2d)
 
-    # Plotting in 3D with unit sphere
-    fig = plt.figure(figsize=(10, 10))  # Corrected figsize
-    ax = fig.add_subplot(111, projection='3d')
+    # ---------------- 3D PLOT ----------------
     pca_3d = PCA(n_components=3)
     reduced_embeddings_3d = pca_3d.fit_transform(all_embeddings)
+    
+    # Normalize the 3D embeddings to lie on the unit sphere
+    reduced_embeddings_3d = normalize_embeddings(reduced_embeddings_3d)
+
     reduced_text_embeddings_3d = reduced_embeddings_3d[:len(text_embeddings)]
     reduced_image_embeddings_3d = reduced_embeddings_3d[len(text_embeddings):]
+
+    fig_3d = plt.figure(figsize=(10, 10))
+    ax3 = fig_3d.add_subplot(111, projection='3d')
     
-    ax.scatter(reduced_text_embeddings_3d[:, 0], reduced_text_embeddings_3d[:, 1], reduced_text_embeddings_3d[:, 2], label='Text Embeddings', alpha=0.5)
-    ax.scatter(reduced_image_embeddings_3d[:, 0], reduced_image_embeddings_3d[:, 1], reduced_image_embeddings_3d[:, 2], label='Image Embeddings', alpha=0.5)
+    # Clean up 3D pane
+    ax3.xaxis.pane.fill = False
+    ax3.yaxis.pane.fill = False
+    ax3.zaxis.pane.fill = False
+    ax3.grid(False) # Remove grid lines for cleaner look
     
-    # Draw a unit sphere
-    u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
-    x = np.cos(u)*np.sin(v)
-    y = np.sin(u)*np.sin(v)
-    z = np.cos(v)
-    #ax.plot_wireframe(x, y, z, color="r", alpha=0.1)
+    # Draw a unit sphere wireframe
+    u = np.linspace(0, 2 * np.pi, 30)
+    v = np.linspace(0, np.pi, 20)
+    x = 0.98 * np.outer(np.cos(u), np.sin(v))
+    y = 0.98 * np.outer(np.sin(u), np.sin(v))
+    z = 0.98 * np.outer(np.ones(np.size(u)), np.cos(v))
+    ax3.plot_wireframe(x, y, z, color="gray", alpha=0.05, linewidth=0.5)
+
+    # Draw geodesic arcs between corresponding text and image embeddings
+    for i in range(len(reduced_text_embeddings_3d)):
+        p1 = reduced_text_embeddings_3d[i]
+        p2 = reduced_image_embeddings_3d[i]
+        
+        # Create interpolation points
+        num_points = 20
+        t_values = np.linspace(0, 1, num_points)
+        # Linear interpolation
+        interp = np.outer(1 - t_values, p1) + np.outer(t_values, p2)
+        # Normalize to project onto sphere surface
+        interp_norm = np.linalg.norm(interp, axis=1, keepdims=True)
+        interp_normalized = interp / interp_norm
+        
+        ax3.plot(interp_normalized[:, 0], interp_normalized[:, 1], interp_normalized[:, 2],
+                color='gray', alpha=0.2, linewidth=0.5)
+
+    ax3.scatter(reduced_text_embeddings_3d[:, 0], reduced_text_embeddings_3d[:, 1], reduced_text_embeddings_3d[:, 2], 
+               label='Text', alpha=0.8, s=20, depthshade=True, c='#1f77b4')
+    ax3.scatter(reduced_image_embeddings_3d[:, 0], reduced_image_embeddings_3d[:, 1], reduced_image_embeddings_3d[:, 2], 
+               label='Image', alpha=0.8, s=20, depthshade=True, c='#ff7f0e')
+
+    plot_title_3d = title + ' (3D Spherical Projection)'
+    ax3.set_title(plot_title_3d, pad=20)
+        
+    ax3.set_xlabel('PC 1')
+    ax3.set_ylabel('PC 2')
+    ax3.set_zlabel('PC 3')
     
-    ax.set_title(title + ' in 3D')
-    ax.set_xlabel('PCA Component 1', labelpad=10)
-    ax.set_ylabel('PCA Component 2', labelpad=10)
-    ax.set_zlabel('PCA Component 3', labelpad=10)
-    plt.legend()
+    # Set consistent view limits
+    ax3.set_xlim([-1, 1])
+    ax3.set_ylim([-1, 1])
+    ax3.set_zlim([-1, 1])
     
+    ax3.legend(loc='upper right')
+        
     img_path_3d = os.path.join(output_dir, f'3d_shift({lambda_shift}).pdf')
     if save:
         os.makedirs(os.path.dirname(img_path_3d), exist_ok=True)
-        plt.savefig(img_path_3d)
-    plt.show()
+        plt.savefig(img_path_3d, bbox_inches='tight', dpi=300)
+    plt.close(fig_3d)
 
 def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
     if output_dir is None:

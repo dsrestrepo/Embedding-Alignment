@@ -54,3 +54,4 @@ build/
 env/
 .conda/
 .local/share/jupyter/kernels/
+*.pdf

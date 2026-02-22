@@ -1,0 +1,415 @@
+% This is a modified version of Springer's LNCS template suitable for anonymized MICCAI 2025 main conference submissions. 
+% Original file: samplepaper.tex, a sample chapter demonstrating the LLNCS macro package for Springer Computer Science proceedings; Version 2.21 of 2022/01/12
+
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encodings may result in incorrect characters.
+%
+\usepackage{graphicx,verbatim}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{booktabs}
+
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following two lines
+% to display URLs in blue roman font according to Springer's eBook style:
+%\usepackage{color}
+%\renewcommand\UrlFont{\color{blue}\rmfamily}
+%\urlstyle{rm}
+%
+\begin{document}
+%
+\title{On the Cone Effect and Modality Misalignment in Medical Vision–Language Embeddings}
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\begin{comment}  %% Removed for anonymized MICCAI submission
+\author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
+Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
+Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+%
+\authorrunning{F. Author et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Princeton University, Princeton NJ 08544, USA \and
+Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
+\email{lncs@springer.com}\\
+\url{http://www.springer.com/gp/computer-science/lncs} \and
+ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+\email{\{abc,lncs\}@uni-heidelberg.de}}
+
+\end{comment}
+
+\author{Anonymized Authors}  %% Added for anonymized MICCAI submission
+\authorrunning{Anonymized Author et al.}
+\institute{Anonymized Affiliations \\
+    \email{email@anonymized.com}}
+  
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in 150--250 words.  If you are to include a link to your Repository, please make sure it is anonymized for the double-blind review phase.
+
+\keywords{First keyword  \and Second keyword \and Another keyword.}
+% Authors must provide keywords and are not allowed to remove this Keyword section.
+
+\end{abstract}
+%
+%
+%
+\section{Introduction}
+Self-supervised learning via contrastive language-image pretraining (CLIP) has established itself as a cornerstone for developing frontier solutions in both natural and medical imaging domains \cite{radford2021learning,zhang2022contrastive}. By leveraging multi-modal supervision, this framework allows to capture complementary information from both modalities in a joint representation space. However, the contraction mapping enforced by the composition of non-linearities in deep networks inevitably leads to the so called ``cone effect'', whereby representations are mapped to a very dense and compact region in representation space. As CLIP objectives rely on separate encoders for image and text, this phenomenon causes embeddings to cluster in narrow, modality-specific regions of the representation manifold. These clusters can remain arbitrarily distant, a phenomenon termed \emph{modality gap} \cite{liang2022mind}. 
+
+It is still not clear if the existence of a domain gap is pathological, although it is known from its inception that it drastically affects downstream performance \cite{liang2022mind}. Empirical and theoretical literature also suggest that CLIP alignment is also suboptimal in terms of intra and inter modality alignment \cite{liang2022mind,shi2023towards,zhang2023diagnosing,schrodi2024two,lee2025diffusion,mistretta2025cross}.
+
+The simplest mechanism of action to correct potential misalignment is the length of the domain-gap manipulate in the embedding space. However, from an information theoretic perspective, simply narrowing the gap as much as possible may lead to perfect inter-modality alignment, but comes at a potentially high information cost exclusive to each modality \cite{jiang2023understanding}. It is possible to minimize this gap in a more constrained fashion \cite{shi2023towards,hu2024reclip,eslami2024mitigate}, but current methods need to be integrated during the pre-training stage of the CLIP model itself. This is also the case for other approaches that address inter or intra-class alignment, relying on explicit terms in the pre-text objective \cite{jiang2023understanding,mistretta2025cross} or training that depends on model inversion methods \cite{huang2025mind,lee2025diffusion}.  
+
+In practice, CLIP-based models are rarely trained from scratch; they are fine-tuned, adapted, or probed. Consequently, there is a critical need for lightweight mechanisms that can manipulate the modality gap post-hoc, adapting pre-trained representations to downstream requirements without expensive retraining. We thus propose a method that takes advantage of the cone effect -- since each modality will be supported in a very dense and compact set in the representation space, a single learnable parameter $\lambda$ can be used to displace the intra-modality embeddings around their centroids, increasing/decreasing the domain gap depending on the downstream task. 
+
+Our contributions are summarized as follows:
+\begin{enumerate}
+\item We introduce a framework that keeps the CLIP modality embedders frozen. The optimal downstream domain gap is modeled via a single learnable parameter in the downstream task.
+\item We perform an extensive analysis on a collection of VLMs pre-trained on both medical and natural images, across a variety of datasets, both comprised of natural or medical images.
+\item We study the impact of the proposed data-driven domain gap adaptation in both early and late fusion settings.
+\end{enumerate}
+
+%\section{Notes and todos}
+%\begin{enumerate}
+%    \item Add more refs in terms of the success of these types of VLMs in solving tasks in the intro/SOTA
+%    \item If we have time the whitening transform could be cool in the fusion stage \cite{zhang2024dual}: idea extract orthogonal directions and vary the gap only on those directions
+%    \item See if pretty pictures of \cite{yaras2024explaining} make sense
+%\end{enumerate}
+
+
+% =========================
+% 2.4.3 / 2.4.4 / 2.4.5 (REPLACEMENT TEXT)
+% Drop-in replacement for your current subsections under:
+% \subsubsection{Reducing the Modality Embedding Gap}
+% =========================
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Problem Statement: Cone Effect and Modality Gap in Medical VLMs}
+\label{sec:problem_theory}
+
+\subsubsection{Modality Gap in Vision--Language Embedding Spaces}
+\label{sec:modality_gap}
+
+Vision--Language Models (VLMs) such as CLIP and SigLIP learn joint embedding spaces by mapping images and texts into a shared hyperspherical representation. Let $f_\theta:\mathcal{I}\rightarrow\mathbb{R}^d$ and $g_\phi:\mathcal{T}\rightarrow\mathbb{R}^d$ denote the image and text encoders. We consider normalized embeddings
+
+\begin{equation}
+v=\frac{f_\theta(I)}{\|f_\theta(I)\|_2},
+\qquad
+t=\frac{g_\phi(T)}{\|g_\phi(T)\|_2},
+\qquad
+v,t\in\mathbb{S}^{d-1}.
+\end{equation}
+
+Despite contrastive supervision, embeddings from each modality remain separated by a persistent displacement, termed the \emph{modality gap}~\cite{liang2022mind}. We quantify this gap through the centroid difference
+
+\begin{equation}
+\mu_v=\mathbb{E}[v],
+\qquad
+\mu_t=\mathbb{E}[t],
+\qquad
+\Delta=\mu_v-\mu_t,
+\label{eq:gap_vector}
+\end{equation}
+where $\|\Delta\|_2$ measures global cross-modal separation.
+
+% ------------------------------------------------------------
+
+\subsubsection{Cone Effect and Modality Gap}
+\label{sec:cone_effect}
+
+A central geometric driver of the modality gap is the \emph{cone effect}, which describes the tendency of deep embeddings to concentrate within narrow angular regions of the hypersphere~\cite{liang2022mind}. In ReLU networks, activations restrict representations to positive orthants, $\phi(x)=\max(x,0)$, and Liang et al.~\cite{liang2022mind} show that cosine similarity increases monotonically through depth,
+\begin{equation}
+\cos(\phi(Wx_1),\phi(Wx_2)) \geq \cos(x_1,x_2),
+\label{eq:cone_similarity}
+\end{equation}
+inducing anisotropic embedding cones around dominant mean directions.
+To quantify the degree of angular concentration, we use the Mean Resultant Length, $R = \|\mathbb{E}[v]\|_2$. For embeddings on the unit hypersphere, $R \in [0, 1]$, where values closer to 1 indicate highly concentrated distributions (narrow cones) and values near 0 indicate isotropy.
+
+Contrastive objectives further stabilize this geometry through the interaction of attractive and repulsive forces. 
+In CLIP, the InfoNCE loss can be decomposed as:
+
+\begin{equation}
+-\log\frac{\exp(v_i^\top t_i/\tau)}
+{\sum_{j}\exp(v_i^\top t_j/\tau)}
+=
+\underbrace{-\frac{1}{\tau}v_i^\top t_i}_{\text{attractive alignment}}
++
+\underbrace{\log\sum_{j}\exp(v_i^\top t_j/\tau)}_{\text{repulsive separation}},
+\label{eq:clip_attract_repel}
+\end{equation}
+
+
+where the first term is an \emph{attractive alignment} term pulling matched pairs together, while the second term is a \emph{batch-wise repulsive} term pushing embeddings away from all negatives.
+
+SigLIP replaces softmax normalization with an all-pairs logistic formulation,
+\begin{equation}
+\mathcal{L}_{\text{SigLIP}}
+=
+-\sum_{i,j}\log\sigma\!\big(L_{ij}(\alpha v_i^\top t_j+\beta)\big),
+\end{equation}
+where negatives contribute independently and gradients saturate once pairs become sufficiently separated. 
+Consequently, the effective strength of repulsion depends on the negative-to-positive ratio and the number of hard negatives within the batch, which can preserve modality-specific cones more strongly under limited semantic diversity.
+
+
+
+\subsubsection{Cone Concentration in Medical Domains}
+\label{sec:medical_specifics}
+
+These effects are amplified in medical domains, where the medical data distribution $\mathcal{M}$ constitutes a low-variance subset of the natural distribution $\mathcal{D}$. Represented as ($\mathcal{M}\subseteq\mathcal{D}$). 
+To formalize this, we adopt the variance decomposition of intermediate layer outputs introduced by Liang et al.~\cite{liang2022mind}. 
+Let $U$ denote the input to a given encoder layer and let $h_\Theta(U)$ denote its output under the layer parameters $\Theta$. 
+
+Then the total output variance satisfies the law of total variance:
+\begin{equation}
+\mathrm{Var}\!\left[h_\Theta(U)\right]
+=
+\underbrace{\mathbb{E}_\Theta\!\left[\mathrm{Var}\!\left(h_\Theta(U)\mid\Theta\right)\right]}_{\text{data-induced variance}}
++
+\underbrace{\mathrm{Var}_\Theta\!\left(\mathbb{E}\!\left[h_\Theta(U)\mid\Theta\right]\right)}_{\text{weight-induced variance}}.
+\label{eq:total_variance_liang}
+\end{equation}
+
+In medical datasets, reduced semantic and visual diversity decreases the varianze in the data-induced component,
+\begin{equation}
+\mathbb{E}_\Theta\!\left[\mathrm{Var}\!\left(h_\Theta(U_{\text{med}})\mid\Theta\right)\right]
+<
+\mathbb{E}_\Theta\!\left[\mathrm{Var}\!\left(h_\Theta(U_{\text{nat}})\mid\Theta\right)\right],
+\label{eq:data_variance_medical}
+\end{equation}
+making medical representations even more susceptible to the cone effect. 
+
+%On the hypersphere, this corresponds to lower embedding dispersion,
+%\mathbb{E}[\|v-\mu_v\|^2]_{\text{med}} < \mathbb{E}[\|v-\mu_v\|^2]_{\text{nat}}$,
+%implying stronger cone effects and potentially larger centroid displacement between modalities.
+
+However, medical-tuned backbones introduce domain-specific inductive biases through specialized pretraining. Such adaptation modifies the weight-induced term in Eq.~\ref{eq:total_variance_liang} by reshaping the representation geometry, which can partially compensate for reduced data variance by expanding clinically meaningful directions. 
+
+%As a result, medical pretraining produces qualitatively different cone configurations and modality gap behavior across medical datasets.
+
+
+\subsubsection{Hyperspherical Embedding Alignment Intervention}
+\label{sec:alignment}
+
+To mitigate the modality gap without modifying encoder weights, we apply an inference-time embedding alignment intervention. For $\lambda\in[0,1]$, embeddings are shifted along the gap vector and renormalized:
+\begin{equation}
+t'=\mathrm{Norm}\!\left(t+\frac{\lambda}{2}\Delta\right),
+\qquad
+v'=\mathrm{Norm}\!\left(v-\frac{\lambda}{2}\Delta\right).
+\label{eq:alignment}
+\end{equation}
+By varying $\lambda$, we study controlled closure of $\|\Delta\|_2$ while preserving intra-modality cone geometry.
+
+
+% ============================================================
+\subsection{Experimental Setup}
+\label{sec:experimental_setup}
+
+\subsubsection{Vision--Language Backbones}
+\label{sec:backbones}
+
+To characterize the interaction between cone concentration, modality gap, and domain-specific inductive biases, we evaluate both general-domain and medically specialized dual-encoder VLMs. Specifically, we consider CLIP (ViT-B/32) and SigLIP (ViT-B/16) as natural-domain baselines, and BioMedCLIP and MedSigLIP as medical-domain variants trained on biomedical corpora and clinically curated image--text pairs. For each backbone, we extract frozen image and text embeddings independently using Eq.~(1), enabling direct geometric comparison across modalities and domains without confounding effects from downstream fine-tuning.
+
+% ------------------------------------------------------------
+
+\subsubsection{Datasets and Domain Shift Regimes}
+\label{sec:datasets}
+
+We conduct experiments on a four medical datasets covering different modalities and data types such as MIMIC-CXR, HAM10000, BRSET, and mBRSET. For reference, we also included some natural domain datasets, including Recipes5k, DAQUAR, COCO-QA, and Fakeddit. Each dataset $\mathcal{D}_k=\{(I_i,T_i,y_i)\}_{i=1}^{N_k}$ consists of paired image--text samples with labels $y_i$ corresponding to either multi-class or multi-label prediction tasks. 
+
+All datasets are partitioned into disjoint training, validation, and test splits,
+$\mathcal{D}_k=\mathcal{D}_k^{\text{train}}\cup\mathcal{D}_k^{\text{val}}\cup\mathcal{D}_k^{\text{test}}$,
+and all alignment operators are computed exclusively on the training split to avoid test leakage.
+
+\subsubsection{Embedding Alignment Protocol}
+\label{sec:lambda_protocol}
+
+To evaluate the causal role of modality gap reduction, we apply the hyperspherical alignment operator defined in Eq.~\ref{eq:alignment} with alignment strength $\lambda\in[0,1]$. For each dataset and backbone, the modality gap vector $\Delta$ is estimated from training embeddings as
+\begin{equation}
+\Delta_k = \mu_v^{(k)} - \mu_t^{(k)},
+\qquad
+\mu_v^{(k)}=\mathbb{E}_{(I,T)\sim \mathcal{D}_k^{\text{train}}}[v],
+\quad
+\mu_t^{(k)}=\mathbb{E}_{(I,T)\sim \mathcal{D}_k^{\text{train}}}[t].
+\end{equation}
+
+We then generate aligned embeddings $\{(v'_i,t'_i)\}$ for $\lambda\in\{0.0,0.1,\dots,1.0\}$, producing a controlled family of representation spaces in which $\|\Delta_k\|_2$ is progressively reduced while preserving intra-modality cone geometry.
+
+% ------------------------------------------------------------
+
+\subsubsection{Linear Probe Evaluation of Representation Quality}
+\label{sec:linear_probe_eval}
+
+To isolate embedding quality from nonlinear classifier capacity, we evaluate aligned representations using an Early Fusion Linear Probe. For each aligned pair $(v'_i,t'_i)$, we form the concatenated feature vector
+\begin{equation}
+x_i = [v'_i;t'_i]\in\mathbb{R}^{2d},
+\end{equation}
+and train a single affine classifier
+\begin{equation}
+\hat{y}_i = Wx_i+b,
+\label{eq:probe_classifier}
+\end{equation}
+with no hidden layers or nonlinear activations.
+
+Probe parameters $(W,b)$ are optimized on $\mathcal{D}_k^{\text{train}}$ by minimizing the empirical risk
+\begin{equation}
+\min_{W,b}\;
+\frac{1}{|\mathcal{D}_k^{\text{train}}|}
+\sum_{(x_i,y_i)\in\mathcal{D}_k^{\text{train}}}
+\ell(\hat{y}_i,y_i),
+\label{eq:erm_probe}
+\end{equation}
+where $\ell$ corresponds to class-weighted binary cross-entropy for multi-label datasets (e.g., MIMIC-CXR) and categorical cross-entropy for multi-class datasets (e.g., HAM10000). 
+
+Optimization is performed using stochastic gradient descent with momentum $0.9$ and learning rate $3\times 10^{-4}$, with early stopping based on validation loss.
+
+% ------------------------------------------------------------
+
+\subsubsection{Evaluation Metrics and Statistical Protocol}
+\label{sec:metrics_protocol}
+
+Model performance is assessed on held-out test splits $\mathcal{D}_k^{\text{test}}$ using the Area Under the Receiver Operating Characteristic Curve (AUC), providing a threshold-independent measure of discriminative quality. For each backbone, dataset, and alignment strength $\lambda$, experiments are repeated across five independent random seeds. Final results are reported as mean $\pm$ standard deviation,
+\begin{equation}
+\mathrm{AUC}_{k,\lambda} =
+\frac{1}{5}\sum_{s=1}^5 \mathrm{AUC}_{k,\lambda}^{(s)}
+\;\;\pm\;\;
+\mathrm{Std}\big(\mathrm{AUC}_{k,\lambda}^{(s)}\big),
+\end{equation}
+ensuring robustness to initialization and data-ordering effects.
+
+% ------------------------------------------------------------
+
+\subsubsection{Geometric Visualization of Cone Structure}
+\label{sec:geometry_vis}
+
+To complement quantitative evaluation, we visualize modality cones and centroid displacement using Principal Component Analysis (PCA). Normalized embeddings are projected into low-dimensional subspaces, allowing qualitative inspection of (i) cross-modal separation induced by $\Delta_k$, and (ii) intra-modality angular concentration associated with the cone effect.
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Results and Discussion}
+\label{sec:results_discussion}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.8\linewidth]{Figures/Fig1_3d_4.pdf}
+    \caption{Low-dimensional visualization of image and text embeddings across datasets and backbones. Projections are shown using the principal components. Image and text embeddings form modality-specific cones with strong angular concentration. A persistent centroid displacement is observed across all models, with tighter cones and reduced dispersion in medical datasets. Alignment radii $R$ quantify intra-modality concentration.}
+    \label{fig:geometry}
+\end{figure}
+
+
+\begin{table}[h]
+\centering
+\caption{Mean Resultant Length ($R$), quantifying the degree of cone concentration for Text and Image embeddings. Higher values indicate narrower cones (stronger concentration). $R \in [0, 1]$.}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccc c cccc}
+\toprule
+ & \multicolumn{4}{c}{\textbf{Text Embeddings ($R$)}} & & \multicolumn{4}{c}{\textbf{Image Embeddings ($R$)}} \\
+\cmidrule{2-5} \cmidrule{7-10}
+\textbf{Dataset} & \textbf{CLIP} & \textbf{SigLIP} & \textbf{BioMed} & \textbf{MedSig} & & \textbf{CLIP} & \textbf{SigLIP} & \textbf{BioMed} & \textbf{MedSig} \\
+\midrule
+\multicolumn{10}{l}{\textit{Medical Datasets}} \\
+\midrule
+MIMIC-CXR & 0.915 & 0.862 & 0.899 & 0.726 & & 0.970 & 0.974 & 0.910 & 0.735 \\
+HAM10000 & 0.919 & 0.809 & 0.889 & 0.970 & & 0.920 & 0.933 & 0.941 & 0.858 \\
+BRSET & 0.985 & 0.956 & 0.990 & 0.980 & & 0.986 & 0.980 & 0.964 & 0.731 \\
+mBRSET & 0.990 & 0.973 & 0.975 & 0.957 & & 0.986 & 0.982 & 0.958 & 0.770 \\
+\midrule
+\multicolumn{10}{l}{\textit{Natural Datasets}} \\
+\midrule
+COCO-QA & 0.852 & 0.743 & 0.769 & 0.751 & & 0.691 & 0.702 & 0.739 & 0.638 \\
+Fakeddit & 0.745 & 0.730 & 0.734 & 0.604 & & 0.654 & 0.657 & 0.702 & 0.597 \\
+Recipes5k & 0.775 & 0.760 & 0.869 & 0.632 & & 0.810 & 0.791 & 0.807 & 0.738 \\
+DAQUAR & 0.903 & 0.793 & 0.816 & 0.881 & & 0.862 & 0.842 & 0.855 & 0.790 \\
+\bottomrule
+\end{tabular}}
+\label{tab:cone_strength}
+\end{table}
+
+Figure~\ref{fig:geometry} visualizes the joint embedding geometry for a representative subset of datasets and backbones. We observe that across all models, both image and text representations concentrate into narrow angular regions of the hypersphere, confirming strong modality-specific cone structure. Due to space constraints, we present the full quantitative analysis of this phenomenon in Table~\ref{tab:cone_strength}, reporting the Mean Resultant Length ($R$) for all studied datasets. The results confirm that anisotropy is amplified in medical datasets, where reduced semantic diversity yields tighter cones and consistently higher $R$ values compared to natural image datasets.
+
+Despite contrastive training, we observe a persistent centroid displacement between modalities, with the modality gap largely aligned with the dominant principal direction. Medical-domain backbones (BioMedCLIP, MedSigLIP) exhibit smaller cross-modal separation than generalist models, but at the cost of increased cone concentration, suggesting that medical pretraining reshapes but does not eliminate modality misalignment.
+
+Figure~\ref{fig:lambda} evaluates the downstream impact of controlled gap reduction via the alignment strength $\lambda$. Moderate closure of the modality gap consistently improves linear-probe AUC across datasets, indicating that excessive cross-modal displacement is detrimental for transfer. However, performance typically saturates---and in some cases slightly degrades---as $\lambda\!\rightarrow\!1$, particularly for medical-domain models on BRSET and mBRSET. This highlights that full collapse of the gap can remove modality-specific information, supporting the view that the optimal geometry corresponds to an intermediate, task-dependent separation rather than perfect overlap. Generalist models benefit more strongly from post-hoc alignment on medical data, consistent with larger initial misalignment under domain shift, while medical-tuned models show smaller but stable gains.
+
+These results suggest that the modality gap is not merely a defect to minimize, but a controllable geometric degree of freedom: reducing excessive separation improves multimodal transfer, yet preserving some modality-specific structure remains critical for maintaining clinically relevant information.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Figures/Fig2.pdf}
+    \caption{Downstream AUC as a function of alignment strength $\lambda$ across datasets and backbones. Moderate reduction of the modality gap consistently improves performance, while excessive closure can lead to saturation or degradation, particularly for medical-domain models. Error bars denote standard deviation across seeds.}
+    \label{fig:lambda}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% =========================
+% NOTES:
+% - Keep your original \cite{3.28} (Mind the Gap) and \cite{3.25} (CLIP).
+% - Add BibTeX entries for SigLIP and any medical variants you cite, e.g.:
+%   \cite{siglip,biomedclip,medsiglip}
+% =========================
+
+
+%
+% the environments 'definition', 'lemma', 'proposition', 'corollary',
+% 'remark', and 'example' are defined in the LLNCS documentclass as well.
+%
+
+
+ %% removed for anonymized MICCAI submission.
+    
+    % The following acknowledgement and disclaimer sections can be removed for the double-blind review process.  If and when your paper is accepted, reinsert the acknowledgement and the disclaimer clause in your final camera-ready version.
+    % IF you opted to include the acknowledgement and disclaimer sections, they will count towards the 8-page limit.
+
+\begin{credits}
+\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
+used for general acknowledgments, for example: This study was funded
+by X (grant number Y).
+
+\subsubsection{\discintname}
+It is now necessary to declare any competing interests or to specifically
+state that the authors have no competing interests. Please place the
+statement with a bold run-in heading in small font size beneath the
+(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
+system, is used, then the disclaimer can be provided directly in the system.},
+for example: The authors have no competing interests to declare that are
+relevant to the content of this article. Or: Author A has received research
+grants from Company W. Author B has received a speaker honorarium from
+Company X and owns stock in Company Y. Author C is a member of committee Z.
+\end{credits}
+\bibliographystyle{splncs04}
+\bibliography{references} 
+\end{document}

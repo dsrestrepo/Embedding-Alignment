@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import argparse
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from src.data_utils import preprocess_data
 from utils import visualize_embeddings, normalize_embeddings, modify_and_normalize_embeddings
 
@@ -28,6 +29,7 @@ def main():
     if len(args.files) != len(args.backbones):
         raise ValueError("Arguments --files and --backbones must have the same number of elements.")
 
+
     for i in range(len(args.datasets)):
         dataset = args.datasets[i]
         path = args.paths[i]
@@ -43,7 +45,11 @@ def main():
             # Load Data
             full_path = os.path.join(path, file)
             print(f"Loading data from {full_path}")
-            df = pd.read_csv(full_path)
+            try:
+                df = pd.read_csv(full_path)
+            except FileNotFoundError:
+                print(f"Error: File not found at {full_path}. Skipping...")
+                continue
         
             # Simple cleanup if needed, based on notebook
             if 'image_id' in df.columns:
@@ -59,8 +65,7 @@ def main():
             # Normalize initial embeddings
             df[text_columns] = normalize_embeddings(df[text_columns].values)
             df[image_columns] = normalize_embeddings(df[image_columns].values)
-
-
+            
             dataset_output_dir = os.path.join(args.output_dir, f"{dataset}/{backbone}")
             os.makedirs(dataset_output_dir, exist_ok=True)
             
@@ -83,6 +88,7 @@ def main():
                     var=True,
                     output_dir=dataset_output_dir
                 )
+
 
 if __name__ == "__main__":
     main()
