@@ -79,7 +79,7 @@ def main():
             return super(NumpyEncoder, self).default(obj)
 
     # Lambda shift values
-    lambda_shift_values = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    lambda_shift_values = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
     # Define the full set of disease label columns for MIMIC
     disease_cols_full = [
@@ -276,8 +276,7 @@ def main():
                             num_epochs=args.epochs, multilabel=multilabel, report=True, V=False,
                             val_loader=val_loader, patience=10, hidden=hidden_config
                         )
-                        print(f"Best Accuracy: {best['Acc']}")
-                        print(f"Best Macro-F1: {best['Macro-F1']}")
+                        print(f"Best AUC: {best['Macro-F1']['Auc']}")
                         early_fusion_runs.append(best)
                         # results[f"early_({lambda_shift})"] = best
 
@@ -288,8 +287,7 @@ def main():
                             num_epochs=args.epochs, multilabel=multilabel, report=True, V=False,
                             val_loader=val_loader, patience=10, hidden=hidden_config
                         )
-                        print(f"Best Accuracy: {best['Acc']}")
-                        print(f"Best Macro-F1: {best['Macro-F1']}")
+                        print(f"Best AUC: {best['Macro-F1']['Auc']}")
                         late_fusion_runs.append(best)
                         # results[f"late_({lambda_shift})"] = best
 
@@ -301,23 +299,11 @@ def main():
                     # Based on structure: best['Macro-F1']['Acc'], best['Macro-F1']['F1'], best['Macro-F1']['Auc']
                     # We use the 'Macro-F1' top-key as the source of truth for the metrics at the best epoch logic
                     
-                    values_acc = [r['Macro-F1']['Acc'] for r in runs if 'Macro-F1' in r]
-                    values_f1 = [r['Macro-F1']['F1'] for r in runs if 'Macro-F1' in r]
                     values_auc = [r['Macro-F1']['Auc'] for r in runs if 'Macro-F1' in r]
                     
                     # Handle None or NaN
-                    values_acc = [v for v in values_acc if v is not None and not np.isnan(v)]
-                    values_f1 = [v for v in values_f1 if v is not None and not np.isnan(v)]
                     values_auc = [v for v in values_auc if v is not None and not np.isnan(v)]
 
-                    if values_acc:
-                        agg['mean']['Acc'] = statistics.mean(values_acc)
-                        agg['std']['Acc'] = statistics.stdev(values_acc) if len(values_acc) > 1 else 0
-                    
-                    if values_f1:
-                        agg['mean']['Macro-F1'] = statistics.mean(values_f1)
-                        agg['std']['Macro-F1'] = statistics.stdev(values_f1) if len(values_f1) > 1 else 0
-                    
                     if values_auc:
                         agg['mean']['AUC'] = statistics.mean(values_auc)
                         agg['std']['AUC'] = statistics.stdev(values_auc) if len(values_auc) > 1 else 0

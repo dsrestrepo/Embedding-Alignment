@@ -235,18 +235,6 @@ def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
     is_aggregated = 'mean' in results.get(first_key, {})
 
     if is_aggregated:
-        early_f1_mean = [results.get(f'early_({lambda_shift})', {}).get('mean', {}).get('Macro-F1', 0) for lambda_shift in lambda_shift_values]
-        early_f1_std = [results.get(f'early_({lambda_shift})', {}).get('std', {}).get('Macro-F1', 0) for lambda_shift in lambda_shift_values]
-        
-        late_f1_mean = [results.get(f'late_({lambda_shift})', {}).get('mean', {}).get('Macro-F1', 0) for lambda_shift in lambda_shift_values]
-        late_f1_std = [results.get(f'late_({lambda_shift})', {}).get('std', {}).get('Macro-F1', 0) for lambda_shift in lambda_shift_values]
-
-        early_acc_mean = [results.get(f'early_({lambda_shift})', {}).get('mean', {}).get('Acc', 0) for lambda_shift in lambda_shift_values]
-        early_acc_std = [results.get(f'early_({lambda_shift})', {}).get('std', {}).get('Acc', 0) for lambda_shift in lambda_shift_values]
-        
-        late_acc_mean = [results.get(f'late_({lambda_shift})', {}).get('mean', {}).get('Acc', 0) for lambda_shift in lambda_shift_values]
-        late_acc_std = [results.get(f'late_({lambda_shift})', {}).get('std', {}).get('Acc', 0) for lambda_shift in lambda_shift_values]
-        
         early_auc_mean = [results.get(f'early_({lambda_shift})', {}).get('mean', {}).get('AUC', 0) for lambda_shift in lambda_shift_values]
         early_auc_std = [results.get(f'early_({lambda_shift})', {}).get('std', {}).get('AUC', 0) for lambda_shift in lambda_shift_values]
         
@@ -254,24 +242,14 @@ def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
         late_auc_std = [results.get(f'late_({lambda_shift})', {}).get('std', {}).get('AUC', 0) for lambda_shift in lambda_shift_values]
     else:
         # Extracting F1 and Accuracy values for early and late fusion models (Backward compatibility)
-        early_f1_mean = [results[f'early_({lambda_shift})']['Macro-F1']['F1'] if f'early_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
-        early_f1_std = None
-        late_f1_mean = [results[f'late_({lambda_shift})']['Macro-F1']['F1'] if f'late_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
-        late_f1_std = None
-
-        early_acc_mean = [results[f'early_({lambda_shift})']['Acc']['Acc'] if f'early_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
-        early_acc_std = None
-        late_acc_mean = [results[f'late_({lambda_shift})']['Acc']['Acc'] if f'late_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
-        late_acc_std = None
-        
         early_auc_mean = [results[f'early_({lambda_shift})']['AUC']['Auc'] if f'early_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
         early_auc_std = None
         late_auc_mean = [results[f'late_({lambda_shift})']['AUC']['Auc'] if f'late_({lambda_shift})' in results else 0 for lambda_shift in lambda_shift_values]
         late_auc_std = None
 
     # Determine which models have data
-    has_early = any(v != 0 for v in early_f1_mean)
-    has_late = any(v != 0 for v in late_f1_mean)
+    has_early = any(v != 0 for v in early_auc_mean)
+    has_late = any(v != 0 for v in late_auc_mean)
     
     if not has_early and not has_late:
         print("No results to plot.")
@@ -297,27 +275,11 @@ def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
         ax.legend()
         ax.grid(True)
 
-    def generate_plot(model_name, f1_mean, f1_std, acc_mean, acc_std, auc_mean, auc_std, color, filename_suffix):
-        figsize = (7, 15)
-        fig, axs = plt.subplots(3, 1, figsize=figsize)
-        axs = axs.reshape(3)
-
-        # Plot F1 Score
-        ax = axs[0]
-        plot_metric(ax, lambda_shift_values, f1_mean, f1_std, f'{model_name} F1 Score', color)
-        ax.set_title(f'{model_name} F1 Score - {DATASET}')
-        ax.set_xlabel('Lambda Shift')
-        ax.set_ylabel('F1 Score')
-
-        # Plot Accuracy
-        ax = axs[1]
-        plot_metric(ax, lambda_shift_values, acc_mean, acc_std, f'{model_name} Accuracy', color)
-        ax.set_title(f'{model_name} Accuracy - {DATASET}')
-        ax.set_xlabel('Lambda Shift')
-        ax.set_ylabel('Accuracy')
+    def generate_plot(model_name, auc_mean, auc_std, color, filename_suffix):
+        figsize = (8, 6)
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
 
         # Plot AUC
-        ax = axs[2]
         plot_metric(ax, lambda_shift_values, auc_mean, auc_std, f'{model_name} AUC', color)
         ax.set_title(f'{model_name} AUC - {DATASET}')
         ax.set_xlabel('Lambda Shift')
@@ -331,10 +293,10 @@ def plot_results(results, lambda_shift_values, DATASET, output_dir=None):
         plt.close(fig)
 
     if has_early:
-        generate_plot('Early Fusion', early_f1_mean, early_f1_std, early_acc_mean, early_acc_std, early_auc_mean, early_auc_std, 'b', 'Early')
+        generate_plot('Early Fusion', early_auc_mean, early_auc_std, 'b', 'Early')
 
     if has_late:
-        generate_plot('Late Fusion', late_f1_mean, late_f1_std, late_acc_mean, late_acc_std, late_auc_mean, late_auc_std, 'r', 'Late')
+        generate_plot('Late Fusion', late_auc_mean, late_auc_std, 'r', 'Late')
     
     
 def update_column_names(columns, new_size):

@@ -9,8 +9,10 @@
 #SBATCH --time=24:00:00
 
 # Load the Anaconda module
-module load anaconda3/2024.06/gcc-13.2.0
-module load cuda/12.2.1/gcc-11.2.0
+#module load anaconda3/2024.06/gcc-13.2.0
+#module load cuda/12.2.1/gcc-11.2.0
+module load miniforge3/25.3.0-3/none-none
+module load cuda/12.2.2/none-none
 
 # Activate the Conda environment
 source activate base_ml
@@ -41,7 +43,7 @@ MODEL_TYPE="early" # Options: 'early', 'late', 'both'
 HIDDEN=0 # For multiple hidden layers: "128 64" ... for linear only: "0"
 EPOCHS=100
 N_RUNS=5
-OUTPUT_DIR="Images/Alignment_early_linear_5runs_batch512_neg_pos"
+OUTPUT_DIR="Images/Alignment_linear_prob"
 BATCH_SIZE=512
 
 mkdir -p "$OUTPUT_DIR"
