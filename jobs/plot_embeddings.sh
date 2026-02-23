@@ -9,8 +9,10 @@
 #SBATCH --time=3:00:00
 
 # Load the Anaconda module
-module load anaconda3/2024.06/gcc-13.2.0
-module load cuda/12.2.1/gcc-11.2.0
+#module load anaconda3/2024.06/gcc-13.2.0
+#module load cuda/12.2.1/gcc-11.2.0
+module load miniforge3/25.3.0-3/none-none
+module load cuda/12.2.2/none-none
 
 # Activate the Conda environment
 source activate base_ml

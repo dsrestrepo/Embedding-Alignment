@@ -32,15 +32,15 @@ Before running the code, ensure you have the following installed:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/dsrestrepo/Foundational-Multimodal-Fusion-Benchmark.git
-cd Foundational-Multimodal-Fusion-Benchmark
+git clone https://github.com/dsrestrepo/Embedding-Alignment/tree/main
+cd Embedding-Alignment
 ```
 
 2. Create a virtual environment (optional but recommended):
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate 
 ```
 
 3. Install dependencies:
@@ -84,43 +84,48 @@ This project uses 8 datasets. You'll find instructions and code about to extract
 
 8. [MIMIC CXR](https://physionet.org/content/mimic-cxr/2.0.0/#files-panel) : The MIMIC-CXR (Medical Information Mart for Intensive Care, Chest X-Ray) dataset is a large, publicly available collection of chest radiographs with associated radiology reports. It was developed by the MIT Lab for Computational Physiology and provides an extensive resource for training and evaluating machine learning models in the field of medical imaging, particularly in automated radiograph interpretation and natural language processing for clinical narratives.
 
-9. **Joslin dataset**: 
-
 ## Usage
 
-1. **Get the Datasets:**
-    - Utilize the `Notebooks/get_datasets.ipynb` notebook to acquire the datasets. Functions and code for extraction and preprocessing are provided.
+1. **Download the Datasets:**
+    - Use the `jobs/download_datasets.sh` script to download and preprocess the datasets.
+    - You can configure which datasets to download by uncommenting the relevant sections in the script.
+    ```bash
+    sbatch jobs/download_datasets.sh
+    ```
 
 2. **Extract VLM Embeddings:**
-    - Use `Notebooks/generate_vlm_embeddings_parallel.ipynb` or the shell script `jobs/job_vlm_embeddings.sh` to extract embeddings from your datasets using state-of-the-art VLMs.
-    - **Supported Models:**
-        - **CLIP** (Contrastive Language-Image Pre-Training)
-        - **SigLIP** (Sigmoid Loss for Language Image Pre-Training)
-        - **MedSigLIP** (Medical-adapted SigLIP)
-        - **BioMedCLIP** (Biomedical Vision-Language Foundation Model)
-    - This step typically generates CSV files containing text and image embeddings which serve as inputs for the alignment process.
+    - Run `jobs/job_vlm_embeddings.sh` to extract embeddings from your datasets using state-of-the-art VLMs.
+    - This script calls `scripts/generate_embeddings_all.py` and supports models like **CLIP**, **SigLIP**, **BioMedCLIP**, and **MedSigLIP**.
+    ```bash
+    sbatch jobs/job_vlm_embeddings.sh
+    ```
+    - The output will be CSV files containing text and image embeddings in the configured embeddings directory.
 
-3. **Run Alignment Experiments:**
-    - The core alignment and training pipeline is managed via `jobs/run_alignment.sh`.
-    - This script calls `scripts/run_alignment.py` to:
-        - Load the pre-computed embeddings.
-        - Apply embedding alignment techniques (shifting distributions).
-        - Train Early and Late Fusion classifiers on the aligned embeddings.
-        - Evaluate performance and save metrics.
-    
-    You can configure the datasets, paths, and training parameters (like multilabel flags) directly in `jobs/run_alignment.sh`.
+3. **Visualize Embeddings:**
+    - **Static Plots:** You can generate embedding plots (like 2D/3D PCA visualizations) using:
+        ```bash
+        sbatch jobs/plot_embeddings.sh
+        ```
+    - **Summary Grids:** To create the summary grids across multiple datasets and models:
+        ```bash
+        sbatch jobs/plot_embedding_summary_mixed_slurm.sh
+        ```
+    - **Animations (GIFs):** To generate animations showing the alignment process across varying lambda values:
+        ```bash
+        sbatch jobs/make_gif_slurm.sh
+        ```
+        <p align="center">
+          <img src="Images/Summary_gif/alignment_animation_3d.gif" alt="3D Alignment Animation" width="400"/>
+          <img src="Images/Summary_gif/alignment_animation_2d.gif" alt="2D Alignment Animation" width="400"/>
+        </p>
 
+4. **Run Alignment (Linear Probing):**
+    - The core alignment and training pipeline (Linear Probing) is managed via `jobs/run_alignment.sh`.
+    - This script calls `scripts/run_alignment.py` to load pre-computed embeddings, train classifiers (Early/Late Fusion), and evaluate performance.
+    - You can configure datasets, paths, and training parameters (like multilabel flags) directly in the script.
     ```bash
     sbatch jobs/run_alignment.sh
     ```
-
-    **Key Scripts:**
-    - `scripts/run_alignment.py`: Main python entry point for alignment and training. Supports argument parsing for multiple datasets and dynamic configuration (e.g., `--multilabel`).
-    - `src/classifiers.py`: Contains the `EarlyFusionModel` and `LateFusionModel` definitions, along with the optimized training loops (including early stopping).
-    - `src/alignment.py`: (Deprecated/Merged) Logic primarily resides in `run_alignment.py`.
-
-4. **Analysis:**
-   - Results (metrics and plots) are saved to the `Images/Alignment` directory (or your configured output path).
 
 
 ## Contributing
@@ -141,4 +146,4 @@ This project is licensed under the MIT License.
 
 For any inquiries or questions regarding this project, please feel free to reach out:
 
-- **Email:** davidres@mit.edu
+- **Email:** @gmail.com
