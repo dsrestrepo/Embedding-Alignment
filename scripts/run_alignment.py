@@ -79,7 +79,7 @@ def main():
             return super(NumpyEncoder, self).default(obj)
 
     # Lambda shift values
-    lambda_shift_values = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    lambda_shift_values = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
     # Define the full set of disease label columns for MIMIC
     disease_cols_full = [

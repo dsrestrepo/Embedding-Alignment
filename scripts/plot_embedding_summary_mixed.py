@@ -14,7 +14,7 @@ from utils import calculate_spherical_statistics, normalize_embeddings
 # Configuration
 EMBEDDINGS_BASE = "Embeddings_vlm"
 OUTPUT_DIR = "Images/Embedding_Plots/Summary_Mixed"
-MAX_SAMPLES = 5000
+MAX_SAMPLES = 20000
 
 # Set plot style
 try:
@@ -66,7 +66,7 @@ def load_embeddings(dataset, model, run="run_1"):
         print(f"Error reading CSV: {e}")
         return None, None
 
-def plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collection, dim='2d'):
+def plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collection, dim='2d', plot_lines=True):
     """
     Plot embeddings and collect stats for tables.
     """
@@ -102,17 +102,18 @@ def plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collecti
         red_img = reduced[len(text_emb):]
         
         # Connections
-        for i in range(min(len(red_text), 1000)): 
-            ax.plot([red_text[i, 0], red_img[i, 0]],
-                    [red_text[i, 1], red_img[i, 1]],
-                    color='gray', alpha=0.1, linewidth=0.3, zorder=1)
+        if plot_lines:
+            for i in range(min(len(red_text), 1000)): 
+                ax.plot([red_text[i, 0], red_img[i, 0]],
+                        [red_text[i, 1], red_img[i, 1]],
+                        color='gray', alpha=0.1, linewidth=0.3, zorder=1)
 
         ax.scatter(red_text[:, 0], red_text[:, 1], 
                   label='Text', alpha=0.6, s=10, edgecolors='w', linewidth=0.2, zorder=2, c='#1f77b4')
         ax.scatter(red_img[:, 0], red_img[:, 1], 
                   label='Image', alpha=0.6, s=10, edgecolors='w', linewidth=0.2, zorder=2, c='#ff7f0e')
         
-        ax.text(0.5, 0.98, stats_str, transform=ax.transAxes, ha='center', va='top', fontsize=8, 
+        ax.text(0.5, 0.90, stats_str, transform=ax.transAxes, ha='center', va='top', fontsize=12, 
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='none'))
         
         ax.grid(True, linestyle='--', alpha=0.3)
@@ -145,22 +146,26 @@ def plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collecti
         ax.plot_wireframe(x, y, z, color="black", alpha=0.2, linewidth=0.8)
         
         # Connections (Geodesic Approximation)
-        for i in range(min(len(red_text), 500)): 
-             p1 = red_text[i]
-             p2 = red_img[i]
-             t_values = np.linspace(0, 1, 10)
-             interp = np.outer(1 - t_values, p1) + np.outer(t_values, p2)
-             interp_norm = np.linalg.norm(interp, axis=1, keepdims=True)
-             interp_normalized = interp / interp_norm
-             ax.plot(interp_normalized[:, 0], interp_normalized[:, 1], interp_normalized[:, 2],
-                     color='gray', alpha=0.1, linewidth=0.3)
+        if plot_lines:
+            for i in range(min(len(red_text), 500)): 
+                 p1 = red_text[i]
+                 p2 = red_img[i]
+                 t_values = np.linspace(0, 1, 10)
+                 interp = np.outer(1 - t_values, p1) + np.outer(t_values, p2)
+                 interp_norm = np.linalg.norm(interp, axis=1, keepdims=True)
+                 interp_normalized = interp / interp_norm
+                 ax.plot(interp_normalized[:, 0], interp_normalized[:, 1], interp_normalized[:, 2],
+                         color='gray', alpha=0.1, linewidth=0.3)
 
         ax.scatter(red_text[:, 0], red_text[:, 1], red_text[:, 2], 
                   label='Text', alpha=0.6, s=5, c='#1f77b4', depthshade=True)
         ax.scatter(red_img[:, 0], red_img[:, 1], red_img[:, 2], 
                   label='Image', alpha=0.6, s=5, c='#ff7f0e', depthshade=True)
                   
-        ax.set_title(stats_str, fontsize=8)
+        # Use text2D for stats in 3D plots to avoid overwriting the title
+        # Dist = 8 makes the camera closer (default is usually 10), making the sphere appear larger
+        ax.dist = 8 
+        ax.text2D(0.5, 0.95, stats_str, transform=ax.transAxes, ha='center', va='top', fontsize=12)
         
         ax.set_xlim([-1, 1])
         ax.set_ylim([-1, 1])
@@ -272,9 +277,8 @@ def collect_all_stats(models):
                     'img_R': img_R, 'img_V': img_V
                 }
     return stats_collection
-
-def create_mixed_grid(datasets, models, output_dir, dim='2d'):
-    print(f"Generating Mixed 4x4 {dim.upper()} Grid...")
+def create_mixed_grid(datasets, models, output_dir, dim='2d', plot_lines=True):
+    print(f"Generating Mixed 4x4 {dim.upper()} Grid (plot_lines={plot_lines})...")
     
     fig = plt.figure(figsize=(16, 16))
     
@@ -306,30 +310,34 @@ def create_mixed_grid(datasets, models, output_dir, dim='2d'):
                 
             print(f"Processing {dataset} - {model}...")
             text_emb, img_emb = load_embeddings(dataset, model)
-            
             if text_emb is not None:
                 # We can reuse the stats collecting plotting, although we already computed full stats, 
                 # we do it again here for the labels inside the plot (which use subsampled data? No, full data)
                 # Let's just collect again, it's safer than passing the huge dict around
-                plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collection, dim=dim)
+                plot_and_collect_stats(ax, text_emb, img_emb, dataset, model, stats_collection, dim=dim, plot_lines=plot_lines)
             else:
+                ax.text(0.5, 0.5, "Data Not Found", ha='center', va='center')
                 ax.text(0.5, 0.5, "Data Not Found", ha='center', va='center')
                 ax.set_xticks([])
                 ax.set_yticks([])
 
             if i == 0:
-                ax.set_title(model_names.get(model, model), fontweight='bold', pad=15, fontsize=14)
+                ax.set_title(model_names.get(model, model), fontweight='bold', pad=15, fontsize=16)
             
             if j == 0:
                 if dim == '2d':
-                    ax.set_ylabel(f"{ds_names.get(dataset, dataset).upper()}", fontweight='bold', fontsize=14, labelpad=10)
+                    ax.set_ylabel(f"{ds_names.get(dataset, dataset).upper()}", fontweight='bold', fontsize=16, labelpad=10)
                 else:
                     # For 3D, put label on left
                     ax.text2D(-0.1, 0.5, f"{ds_names.get(dataset, dataset).upper()}", 
-                             transform=ax.transAxes, fontweight='bold', fontsize=12, rotation='vertical', va='center')
+                             transform=ax.transAxes, fontweight='bold', fontsize=14, rotation='vertical', va='center')
 
     plt.tight_layout()
-    plt.subplots_adjust(top=0.92, left=0.08, right=0.98, hspace=0.3, wspace=0.2)
+    if dim == '3d':
+        # Tighter spacing for 3D to make plots larger
+        plt.subplots_adjust(top=0.90, left=0.05, right=0.99, hspace=0.1, wspace=0.1)
+    else:
+        plt.subplots_adjust(top=0.90, left=0.08, right=0.98, hspace=0.4, wspace=0.3)
     
     from matplotlib.lines import Line2D
     # Vertical Separator
@@ -338,19 +346,36 @@ def create_mixed_grid(datasets, models, output_dir, dim='2d'):
     
     # Horizontal Separator (between row 1 (mbrset) and 2 (coco-qa))
     # Y = 0.5 roughly
-    line_h = Line2D([0.02, 0.98], [0.5, 0.5], transform=fig.transFigure, color="black", linestyle="-", linewidth=2.0)
+    if dim == '3d':
+        y_line_pos = 0.50 # Moved up slightly for 3D to avoid overlap
+    else:
+        y_line_pos = 0.48 # Kept same for 2D
+
+    line_h = Line2D([0.02, 0.98], [y_line_pos, y_line_pos], transform=fig.transFigure, color="black", linestyle="-", linewidth=2.0)
     fig.add_artist(line_h)
 
-    fig.text(0.30, 0.96, "Generalist Models", ha='center', fontsize=18, fontweight='bold', color='#1f77b4')
-    fig.text(0.75, 0.96, "Medical Models", ha='center', fontsize=18, fontweight='bold', color='#d62728')
+    fig.text(0.30, 0.96, "Generalist Models", ha='center', fontsize=20, fontweight='bold', color='#1f77b4')
+    fig.text(0.75, 0.96, "Medical Models", ha='center', fontsize=20, fontweight='bold', color='#d62728')
     
     # Side headers
     # Slightly adjusted X position due to rotated label
-    fig.text(0.02, 0.72, "Medical", rotation=90, va='center', ha='center', fontsize=16, fontweight='bold', color='#444444')
-    fig.text(0.02, 0.25, "Natural", rotation=90, va='center', ha='center', fontsize=16, fontweight='bold', color='#444444')
+    fig.text(0.02, 0.72, "Medical", rotation=90, va='center', ha='center', fontsize=18, fontweight='bold', color='#444444')
+    fig.text(0.02, 0.25, "Natural", rotation=90, va='center', ha='center', fontsize=18, fontweight='bold', color='#444444')
+
+    # Global Legend - Centered at intersection
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#ff7f0e', label='Image Emb.', markersize=10),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#1f77b4', label='Text Emb.', markersize=10)
+    ]
+    
+    # Position legend at the intersection of lines (approx x=0.525, y=0.48)
+    fig.legend(handles=legend_elements, loc='center', ncol=1, fontsize=12, 
+              bbox_to_anchor=(0.525, y_line_pos),
+              frameon=True, framealpha=1.0, edgecolor='black')
 
     os.makedirs(output_dir, exist_ok=True)
-    out_path = os.path.join(output_dir, f"Mixed_Datasets_Embedding_Grid_4x4_{dim}.pdf")
+    suffix = "_with_lines" if plot_lines else ""
+    out_path = os.path.join(output_dir, f"Mixed_Datasets_Embedding_Grid_4x4_{dim}{suffix}.pdf")
     plt.savefig(out_path, dpi=300, bbox_inches='tight')
     print(f"Saved {out_path}")
 
@@ -372,12 +397,15 @@ if __name__ == "__main__":
     models = ["CLIP", "SigLIP", "BioMedCLIP", "MedSigLIP"]
     
     # Generate Stats for ALL datasets (Tables)
-    print("Collecting comprehensive stats...")
-    full_stats = collect_all_stats(models)
-    generate_latex_tables(full_stats, OUTPUT_DIR)
+    #print("Collecting comprehensive stats...")
+    #full_stats = collect_all_stats(models)
+    #generate_latex_tables(full_stats, OUTPUT_DIR)
     
+    print("Plotting Mixed Grids...")
     # 2D Grid Plot
-    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='2d')
+    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='2d', plot_lines=True)
+    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='2d', plot_lines=False)
     
     # 3D Grid Plot
-    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='3d')
+    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='3d', plot_lines=True)
+    create_mixed_grid(datasets_plot, models, OUTPUT_DIR, dim='3d', plot_lines=False)

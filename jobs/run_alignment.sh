@@ -19,29 +19,29 @@ source activate base_ml
 # Example: sbatch --export=ALL,DATASET="MIMIC",FILE="embeddings_clip_mimic.csv" jobs/run_alignment.sh
 
 # To run multiple datasets, separate with spaces in quotes
-#EMBEDDINGS_PATHS="/gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/" #"/gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/ /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/ /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/ /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/ /gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/"
-EMBEDDINGS_PATHS="/gpfs/workdir/restrepoda/Embeddings_vlm/mimic/" #"/gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/ /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/ /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/ /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/ /gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/"
+EMBEDDINGS_PATHS="/gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/" #"/gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/ /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/ /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/ /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/ /gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/"
+#EMBEDDINGS_PATHS="/gpfs/workdir/restrepoda/Embeddings_vlm/mimic/" #"/gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/ /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/ /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/ /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/ /gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/"
 
 FILES="embeddings_biomedclip.csv  embeddings_clip.csv  embeddings_medsiglip.csv  embeddings_siglip.csv"
 
-#DATASET="brset ham10000 mimic mbrset" #"Recipes5k daquar coco-qa fakeddit brset ham10000 mimic mbrset"
-DATASET="mimic"
+DATASET="brset ham10000 mimic mbrset" #"Recipes5k daquar coco-qa fakeddit brset ham10000 mimic mbrset"
+#DATASET="mimic"
 
 BACKBONE="BioMedCLIP CLIP MedSigLIP SigLIP "
+
 # Multilabel flags corresponding to DATASET (Recipes5k=False, daquar=True, coco-qa=False, fakeddit=False, brset=False, ham10000=False, mimic=True, mbrset=False)
+MULTILABEL="False False True False" #"False True False False False False True False"
+#MULTILABEL="False" #Test mimic on multiclass
 
-#MULTILABEL="False False True False" #"False True False False False False True False"
-MULTILABEL="False" #Test mimic on multiclass
 
-
-#LABEL_COLUMN="DR_2 dx disease_label DR_2" #"class answer answers 2_way_label DR_2 dx disease_label DR_2"
-LABEL_COLUMN="disease_label" #Test mimic on multiclass
+LABEL_COLUMN="DR_2 dx disease_label DR_2" #"class answer answers 2_way_label DR_2 dx disease_label DR_2"
+#LABEL_COLUMN="disease_label" #Test mimic on multiclass
 
 MODEL_TYPE="early" # Options: 'early', 'late', 'both'
 HIDDEN=0 # For multiple hidden layers: "128 64" ... for linear only: "0"
 EPOCHS=100
 N_RUNS=5
-OUTPUT_DIR="Images/Alignment_early_linear_5runs_batch512"
+OUTPUT_DIR="Images/Alignment_early_linear_5runs_batch512_neg_pos"
 BATCH_SIZE=512
 
 mkdir -p "$OUTPUT_DIR"

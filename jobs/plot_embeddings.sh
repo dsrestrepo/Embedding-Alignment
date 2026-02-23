@@ -17,7 +17,9 @@ source activate base_ml
 
 # Example using space-separated strings (as per python script logic)
 EMBEDDINGS_PATHS="/gpfs/workdir/restrepoda/Embeddings_vlm/Recipes5k/ /gpfs/workdir/restrepoda/Embeddings_vlm/daquar/ /gpfs/workdir/restrepoda/Embeddings_vlm/coco-qa/ /gpfs/workdir/restrepoda/Embeddings_vlm/fakeddit/ /gpfs/workdir/restrepoda/Embeddings_vlm/brset/ /gpfs/workdir/restrepoda/Embeddings_vlm/ham10000/ /gpfs/workdir/restrepoda/Embeddings_vlm/mimic/ /gpfs/workdir/restrepoda/Embeddings_vlm/mbrset/"
-FILES="embeddings_biomedclip.csv  embeddings_clip.csv  embeddings_medsiglip.csv  embeddings_siglip.csv"
+# FILES and BACKBONE need to match in length and order
+# Matched to local script: CLIP, SigLIP, MedSigLIP, BioMedCLIP
+FILES="embeddings_clip.csv embeddings_siglip.csv embeddings_medsiglip.csv embeddings_biomedclip.csv"
 DATASET="Recipes5k daquar coco-qa fakeddit brset ham10000 mimic mbrset"
 BACKBONE="CLIP SigLIP MedSigLIP BioMedCLIP"
 
@@ -33,4 +35,4 @@ python scripts/plot_embeddings.py \
     --datasets $DATASET \
     --backbones $BACKBONE \
     --output_dir "$OUTPUT_DIR" \
-    --shifts -1 -0.5 0 0.5 1
+    --shifts 0
