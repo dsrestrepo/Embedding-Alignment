@@ -1,27 +1,3 @@
-Lmod has detected the following error: The following module(s) are unknown:
-"anaconda3/2024.06/gcc-13.2.0"
-
-Please check the spelling or version number. Also try "module spider ..."
-It is also possible your cache file is out-of-date; it may help to try:
-  $ module --ignore_cache load "anaconda3/2024.06/gcc-13.2.0"
-
-Also make sure that all modulefiles written in TCL start with the string
-#%Module
-
-
-
-Lmod has detected the following error: The following module(s) are unknown:
-"cuda/12.2.1/gcc-11.2.0"
-
-Please check the spelling or version number. Also try "module spider ..."
-It is also possible your cache file is out-of-date; it may help to try:
-  $ module --ignore_cache load "cuda/12.2.1/gcc-11.2.0"
-
-Also make sure that all modulefiles written in TCL start with the string
-#%Module
-
-
-
 Running plot_auc_summary.py...
-Looking for metrics in: Images/Alignment_early_linear_5runs_batch512
-Summary plot saved to Images/Summary/Medical_Datasets_AUC_Grid_4x4.pdf
+Looking for metrics in: Images/Alignment_linear_prob
+Summary plot saved to Images/Summary_2/Medical_Datasets_AUC_Grid_4x4.pdf

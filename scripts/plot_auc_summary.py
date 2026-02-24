@@ -142,7 +142,7 @@ def main():
     # We can draw a vertical line.
     from matplotlib.lines import Line2D
     # Approximate middle of the figure logic
-    line = Line2D([0.535, 0.535], [0.08, 0.93], transform=fig.transFigure, color="black", linestyle="--", linewidth=2)
+    line = Line2D([0.525, 0.525], [0.08, 0.93], transform=fig.transFigure, color="black", linestyle="--", linewidth=2)
     fig.add_artist(line)
 
     # Super Titles for Groups
